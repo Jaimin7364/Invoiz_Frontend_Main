@@ -266,9 +266,28 @@ class ProductProvider extends ChangeNotifier {
     return false;
   }
   
-  // Refresh products
+  // Refresh products (useful after stock changes)
   Future<void> refreshProducts() async {
-    await getProducts();
+    await getProducts(page: 1);
+  }
+
+  // Update local product stock (for immediate UI updates)
+  void updateProductStock(String productId, int newStockQuantity) {
+    final productIndex = _products.indexWhere((p) => p.id == productId);
+    if (productIndex != -1) {
+      final product = _products[productIndex];
+      _products[productIndex] = product.copyWith(stockQuantity: newStockQuantity);
+      notifyListeners();
+    }
+  }
+
+  // Update multiple products stock
+  void updateMultipleProductsStock(List<Map<String, dynamic>> stockUpdates) {
+    for (final update in stockUpdates) {
+      final productId = update['productId'] as String;
+      final newStock = update['newStock'] as int;
+      updateProductStock(productId, newStock);
+    }
   }
   
   // Search products locally
@@ -298,6 +317,85 @@ class ProductProvider extends ChangeNotifier {
       if (isLowStock != null && product.isLowStock != isLowStock) return false;
       return true;
     }).toList();
+  }
+  
+  // Update stock quantities for multiple products after invoice creation
+  void updateProductStockAfterInvoice(List<Map<String, dynamic>> stockUpdates) {
+    for (var update in stockUpdates) {
+      final productId = update['productId'] as String;
+      final quantitySold = update['quantitySold'] as int;
+      
+      // Find and update the product in local list
+      final index = _products.indexWhere((p) => p.id == productId);
+      if (index != -1) {
+        final product = _products[index];
+        final newStockQuantity = product.stockQuantity - quantitySold;
+        
+        // Create updated product with new stock quantity
+        _products[index] = Product(
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          category: product.category,
+          price: product.price,
+          cost: product.cost,
+          unit: product.unit,
+          sku: product.sku,
+          brand: product.brand,
+          weight: product.weight,
+          dimensions: product.dimensions,
+          barcode: product.barcode,
+          expiryDate: product.expiryDate,
+          unitCapacity: product.unitCapacity,
+          capacityUnit: product.capacityUnit,
+          taxRate: product.taxRate,
+          isActive: product.isActive,
+          stockQuantity: newStockQuantity < 0 ? 0 : newStockQuantity, // Prevent negative quantities
+          minimumStock: product.minimumStock,
+          businessId: product.businessId,
+          userId: product.userId,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt,
+        );
+      }
+    }
+    notifyListeners();
+  }
+  
+  // Update single product stock after sale
+  void updateSingleProductStockAfterSale(String productId, int quantitySold) {
+    final index = _products.indexWhere((p) => p.id == productId);
+    if (index != -1) {
+      final product = _products[index];
+      final newStockQuantity = product.stockQuantity - quantitySold;
+      
+      _products[index] = Product(
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        price: product.price,
+        cost: product.cost,
+        unit: product.unit,
+        sku: product.sku,
+        brand: product.brand,
+        weight: product.weight,
+        dimensions: product.dimensions,
+        barcode: product.barcode,
+        expiryDate: product.expiryDate,
+        unitCapacity: product.unitCapacity,
+        capacityUnit: product.capacityUnit,
+        taxRate: product.taxRate,
+        isActive: product.isActive,
+        stockQuantity: newStockQuantity < 0 ? 0 : newStockQuantity,
+        minimumStock: product.minimumStock,
+        businessId: product.businessId,
+        userId: product.userId,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+      );
+      notifyListeners();
+    }
   }
   
   // Clear all data

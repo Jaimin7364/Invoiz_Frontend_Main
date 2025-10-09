@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/invoice_model.dart';
 import '../models/product_model.dart';
+import '../services/api_service.dart';
 
 class InvoiceProvider extends ChangeNotifier {
-  // final ApiService _apiService = ApiService(); // TODO: Use when API is implemented
+  final ApiService _apiService = ApiService();
+
+  // Callback for notifying product stock updates
+  Function(List<Map<String, dynamic>>)? onStockUpdated;
 
   // Current invoice being created
   Invoice? _currentInvoice;
@@ -28,6 +32,11 @@ class InvoiceProvider extends ChangeNotifier {
   
   // Invoice list
   List<Invoice> _invoices = [];
+
+  // Set stock update callback
+  void setStockUpdateCallback(Function(List<Map<String, dynamic>>) callback) {
+    onStockUpdated = callback;
+  }
 
   // Getters
   Invoice? get currentInvoice => _currentInvoice;
@@ -162,43 +171,92 @@ class InvoiceProvider extends ChangeNotifier {
     try {
       // Convert selected products to invoice items
       final invoiceItems = _selectedProducts.values.map((selectedProduct) {
-        return InvoiceItem(
-          productId: selectedProduct.product.id!,
-          productName: selectedProduct.product.name,
-          price: selectedProduct.product.price,
-          quantity: selectedProduct.quantity,
-          unit: selectedProduct.product.unit,
-          total: selectedProduct.total,
-        );
+        return {
+          'productId': selectedProduct.product.id!,
+          'productName': selectedProduct.product.name,
+          'price': selectedProduct.product.price,
+          'quantity': selectedProduct.quantity,
+          'unit': selectedProduct.product.unit,
+          'total': selectedProduct.total,
+        };
       }).toList();
 
-      // Build the invoice
-      final invoice = InvoiceBuilder()
-          .setInvoiceNumber(generateInvoiceNumber())
-          .setInvoiceDate(DateTime.now())
-          .setCustomer(_customerInfo!)
-          .setItems(invoiceItems)
-          .setDiscount(_discountAmount, _discountType)
-          .setDiscountPercentage(_discountPercentage)
-          .setPaymentMethod(_paymentMethod)
-          .build();
+      // Prepare invoice data for API
+      final invoiceData = {
+        'items': invoiceItems,
+        'customerInfo': {
+          'name': _customerInfo!.name,
+          'mobileNumber': _customerInfo!.mobileNumber,
+        },
+        'totalAmount': totalAmount,
+        'paymentMethod': _paymentMethod.toString().split('.').last,
+        'discountAmount': calculatedDiscountAmount,
+        'discountType': _discountType.toString().split('.').last,
+      };
 
-      // Save to API (if endpoint exists)
-      // final response = await _apiService.post('/invoices', data: invoice.toJson());
-      // if (response.data['success'] == true) {
-      //   final savedInvoice = Invoice.fromJson(response.data['data']);
-      //   _invoices.insert(0, savedInvoice);
-      //   _currentInvoice = savedInvoice;
-      // }
+      // Call API to create invoice and update stock
+      final response = await _apiService.post('/invoices/create', data: invoiceData);
 
-      // For now, just store locally
-      _currentInvoice = invoice;
-      _invoices.insert(0, invoice);
+      if (response.data['success'] == true) {
+        final invoiceData = response.data['data']['invoice'];
+        final stockUpdates = response.data['data']['stockUpdates'] as List<dynamic>;
 
-      notifyListeners();
-      return invoice;
+        // Create invoice object from response
+        final invoice = Invoice(
+          invoiceNumber: invoiceData['invoiceNumber'],
+          invoiceDate: DateTime.parse(invoiceData['invoiceDate']),
+          customer: _customerInfo!,
+          items: _selectedProducts.values.map((selectedProduct) {
+            return InvoiceItem(
+              productId: selectedProduct.product.id!,
+              productName: selectedProduct.product.name,
+              price: selectedProduct.product.price,
+              quantity: selectedProduct.quantity,
+              unit: selectedProduct.product.unit,
+              total: selectedProduct.total,
+            );
+          }).toList(),
+          subtotal: subtotal,
+          discountAmount: calculatedDiscountAmount,
+          discountType: _discountType,
+          discountPercentage: _discountPercentage,
+          totalAmount: totalAmount,
+          paymentMethod: _paymentMethod,
+          paymentStatus: PaymentStatus.completed,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        // Store invoice
+        _currentInvoice = invoice;
+        _invoices.insert(0, invoice);
+
+        // Notify about stock updates
+        if (onStockUpdated != null) {
+          onStockUpdated!(stockUpdates.cast<Map<String, dynamic>>());
+        }
+
+        // Notify listeners about stock updates so ProductProvider can refresh
+        notifyListeners();
+
+        // Show success message with stock update info
+        final updatedProducts = stockUpdates.map((update) => 
+          '${update['productName']}: ${update['oldStock']} → ${update['newStock']}'
+        ).join(', ');
+        
+        debugPrint('Invoice created successfully! Stock updated for: $updatedProducts');
+
+        return invoice;
+      } else {
+        _setError(response.data['message'] ?? 'Failed to create invoice');
+        return null;
+      }
     } catch (e) {
-      _setError('Failed to create invoice: ${e.toString()}');
+      if (e.toString().contains('Insufficient stock')) {
+        _setError('Some products don\'t have enough stock. Please check quantities and try again.');
+      } else {
+        _setError('Failed to create invoice: ${e.toString()}');
+      }
       return null;
     } finally {
       _setLoading(false);

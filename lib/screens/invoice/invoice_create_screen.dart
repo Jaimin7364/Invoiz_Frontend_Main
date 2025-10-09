@@ -22,6 +22,17 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProducts();
+      _setupStockUpdateCallback();
+    });
+  }
+
+  void _setupStockUpdateCallback() {
+    final invoiceProvider = Provider.of<InvoiceProvider>(context, listen: false);
+    final productProvider = Provider.of<ProductProvider>(context, listen: false);
+    
+    // Set up callback for stock updates
+    invoiceProvider.setStockUpdateCallback((stockUpdates) {
+      productProvider.updateProductStockAfterInvoice(stockUpdates);
     });
   }
 
