@@ -48,6 +48,9 @@ dependencies:
   image_picker: ^1.0.7
   cached_network_image: ^3.3.1
 
+  # QR Code Generation
+  qr_flutter: ^4.1.0
+
   # Utilities
   intl: ^0.20.2
   url_launcher: ^6.2.4

@@ -7,6 +7,7 @@ import '../../widgets/custom_app_bar.dart';
 import '../subscription/subscription_status_screen.dart';
 import 'profile_screen.dart';
 import '../products/products_screen.dart';
+import '../invoice/invoice_create_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -218,34 +219,80 @@ class DashboardTab extends StatelessWidget {
                   style: AppTextStyles.h5,
                 ),
                 const SizedBox(height: AppSizes.md),
-                Row(
+                Column(
                   children: [
-                    Expanded(
-                      child: _buildQuickActionCard(
-                        context,
-                        icon: Icons.add_box,
-                        title: 'Add Product',
-                        subtitle: 'New product',
-                        color: AppColors.primary,
-                        onTap: () {
-                          // TODO: Navigate to create product
-                          _showComingSoon(context);
-                        },
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildQuickActionCard(
+                            context,
+                            icon: Icons.receipt_long,
+                            title: 'Create Invoice',
+                            subtitle: 'New invoice',
+                            color: AppColors.primary,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const InvoiceCreateScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: AppSizes.md),
+                        Expanded(
+                          child: _buildQuickActionCard(
+                            context,
+                            icon: Icons.add_box,
+                            title: 'Add Product',
+                            subtitle: 'New product',
+                            color: AppColors.secondary,
+                            onTap: () {
+                              // TODO: Navigate to create product
+                              _showComingSoon(context);
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: AppSizes.md),
-                    Expanded(
-                      child: _buildQuickActionCard(
-                        context,
-                        icon: Icons.person_add,
-                        title: 'Add Customer',
-                        subtitle: 'New customer',
-                        color: AppColors.secondary,
-                        onTap: () {
-                          // TODO: Navigate to add customer
-                          _showComingSoon(context);
-                        },
-                      ),
+                    const SizedBox(height: AppSizes.md),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildQuickActionCard(
+                            context,
+                            icon: Icons.person_add,
+                            title: 'Add Customer',
+                            subtitle: 'New customer',
+                            color: AppColors.warning,
+                            onTap: () {
+                              // TODO: Navigate to add customer
+                              _showComingSoon(context);
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: AppSizes.md),
+                        Expanded(
+                          child: _buildQuickActionCard(
+                            context,
+                            icon: Icons.inventory_2,
+                            title: 'View Products',
+                            subtitle: 'Manage stock',
+                            color: AppColors.success,
+                            onTap: () {
+                              // Navigate to products tab
+                              if (context.mounted) {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const ProductsScreen(),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

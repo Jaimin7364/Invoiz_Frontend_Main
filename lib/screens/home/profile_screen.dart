@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/product_provider.dart';
+import '../../providers/invoice_provider.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../models/user_model.dart';
 import '../../services/language_service.dart';
@@ -486,13 +488,25 @@ class ProfileScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop();
+                
+                // Clear all provider data before logout
+                final productProvider = Provider.of<ProductProvider>(context, listen: false);
+                final invoiceProvider = Provider.of<InvoiceProvider>(context, listen: false);
+                
+                productProvider.clearData();
+                invoiceProvider.clearData();
+                
+                // Logout user
                 await authProvider.logout();
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (context) => const WelcomeScreen(),
-                  ),
-                  (route) => false,
-                );
+                
+                if (context.mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (context) => const WelcomeScreen(),
+                    ),
+                    (route) => false,
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.error,

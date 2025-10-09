@@ -10,6 +10,7 @@ import 'services/razorpay_service.dart';
 import 'services/language_service.dart';
 import 'services/subscription_route_observer.dart';
 import 'providers/product_provider.dart';
+import 'providers/invoice_provider.dart';
 import 'screens/splash_screen.dart';
 import 'l10n/app_localizations.dart';
 
@@ -39,6 +40,7 @@ class InvoizApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
+        ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider.value(value: languageService),
       ],
       child: Consumer<LanguageService>(
