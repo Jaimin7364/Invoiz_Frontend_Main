@@ -12,7 +12,7 @@ class RazorpayService {
   late Razorpay _razorpay;
   ApiService? _apiService;
 
-  // Razorpay credentials - for now use live key for testing
+  // Live Razorpay credentials
   static const String _razorpayLiveKey = 'rzp_live_RQWzfr7G9SM0f9';
 
   // Callbacks
@@ -44,73 +44,23 @@ class RazorpayService {
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
     if (kDebugMode) {
-      print('🎉 Payment Success: ${response.paymentId}');
-      print('🎉 Order ID: ${response.orderId}');
-      print('🎉 Signature: ${response.signature}');
+      print('Payment Success: ${response.paymentId}');
     }
     _onPaymentSuccess?.call(response);
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
     if (kDebugMode) {
-      print('❌ Payment Error: ${response.code} - ${response.message}');
-      print('❌ Error data: ${response.error}');
+      print('Payment Error: ${response.code} - ${response.message}');
     }
     _onPaymentError?.call(response);
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
     if (kDebugMode) {
-      print('💳 External Wallet: ${response.walletName}');
+      print('External Wallet: ${response.walletName}');
     }
     _onExternalWallet?.call(response);
-  }
-
-  // Simple test payment to check if Razorpay works
-  void testSimplePayment() {
-    if (kDebugMode) {
-      print('🧪 Testing simple Razorpay payment...');
-      print('🧪 Razorpay instance: $_razorpay');
-    }
-
-    try {
-      // Very basic options for testing
-      var options = {
-        'key': _razorpayLiveKey,
-        'amount': 100, // ₹1 in paise
-        'name': 'Test Payment',
-        'description': 'Testing Razorpay integration',
-        'prefill': {
-          'contact': '9999999999',
-          'email': 'test@example.com'
-        }
-      };
-
-      if (kDebugMode) {
-        print('🧪 About to call _razorpay.open()...');
-        print('🧪 Options: $options');
-      }
-
-      // Add a small delay to ensure everything is initialized
-      Future.delayed(Duration(milliseconds: 100), () {
-        try {
-          _razorpay.open(options);
-          if (kDebugMode) {
-            print('🧪 _razorpay.open() called successfully');
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            print('❌ Error in delayed call: $e');
-          }
-        }
-      });
-      
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Test payment failed: $e');
-        print('❌ Stack trace: ${StackTrace.current}');
-      }
-    }
   }
 
   Future<ApiResponse<Map<String, dynamic>>> createSubscriptionOrder({
@@ -203,66 +153,109 @@ class RazorpayService {
       formattedPhone = formattedPhone.substring(formattedPhone.length - 10);
     }
 
-    if (kIsWeb) {
-      // For web, show a message that payment should be done on mobile
+    var options = {
+      'key': _razorpayLiveKey, // Use live key directly
+      'amount': (amount * 100).toInt(), // Amount in paise
+      'name': 'Invoiz',
+      'description': description,
+      'order_id': orderId,
+      'prefill': {
+        'contact': formattedPhone,
+        'email': userEmail,
+        'name': userName,
+      },
+      'theme': {
+        'color': '#2E7D32',
+      },
+      'external': {
+        'wallets': ['paytm', 'phonepe', 'gpay', 'amazon_pay']
+      },
+      'modal': {
+        'ondismiss': () {
+          if (kDebugMode) {
+            print('Payment modal dismissed');
+          }
+        }
+      },
+      'notes': {
+        'platform': 'flutter',
+        'app': 'invoiz',
+      }
+    };
+
+    if (kDebugMode) {
+      print('=== Razorpay Options ===');
+      print('Options: $options');
+      print('=========================');
+    }
+
+    try {
       if (kDebugMode) {
-        print('🌐 Web payments not supported in this build. Please use mobile app.');
+        print('Calling _razorpay.open()...');
+      }
+      _razorpay.open(options);
+      if (kDebugMode) {
+        print('_razorpay.open() called successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error opening Razorpay: $e');
+        print('Stack trace: ${StackTrace.current}');
       }
       _onPaymentError?.call(PaymentFailureResponse(
         500,
-        'Web payments not supported. Please use the mobile app for payments.',
-        {'error': 'Web payments not implemented'},
+        'Failed to open payment gateway',
+        {'error': e.toString()},
       ));
-    } else {
-      // Use mobile implementation
-      var options = {
-        'key': _razorpayLiveKey,
-        'amount': (amount * 100).toInt(), // Amount in paise
-        'name': 'Invoiz',
-        'description': description,
-        'order_id': orderId,
-        'prefill': {
-          'contact': formattedPhone,
-          'email': userEmail,
-          'name': userName,
-        },
-        'theme': {
-          'color': '#2E7D32',
-        },
-        'external': {
-          'wallets': ['paytm', 'phonepe', 'gpay', 'amazon_pay']
-        },
-        'notes': {
-          'platform': 'flutter',
-          'app': 'invoiz',
-        }
-      };
-
-      if (kDebugMode) {
-        print('=== Razorpay Options ===');
-        print('Options: $options');
-        print('=========================');
-      }
-
-      try {
-        if (kDebugMode) {
-          print('Calling _razorpay.open()...');
-        }
-        _razorpay.open(options);
-        if (kDebugMode) {
-          print('_razorpay.open() called successfully');
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('Error opening Razorpay: $e');
-          print('Stack trace: ${StackTrace.current}');
-        }
-        _onPaymentError?.call(PaymentFailureResponse(
-          500,
-          'Failed to open payment gateway',
-          {'error': e.toString()},
-        ));
-      }
     }
   }
+
+  // Helper method to format amount for display
+  static String formatAmount(double amount) {
+    return '₹${amount.toStringAsFixed(2)}';
+  }
+
+  // Helper method to format currency
+  static String formatCurrency(String currency) {
+    switch (currency.toUpperCase()) {
+      case 'INR':
+        return '₹';
+      case 'USD':
+        return '\$';
+      default:
+        return currency;
+    }
+  }
+}
+
+// Payment status enum
+enum PaymentStatus {
+  pending,
+  success,
+  failed,
+  cancelled,
+}
+
+// Payment result class
+class PaymentResult {
+  final PaymentStatus status;
+  final String? paymentId;
+  final String? orderId;
+  final String? signature;
+  final String? errorMessage;
+  final Map<String, dynamic>? subscriptionData;
+
+  PaymentResult({
+    required this.status,
+    this.paymentId,
+    this.orderId,
+    this.signature,
+    this.errorMessage,
+    this.subscriptionData,
+  });
+
+  bool get isSuccess => status == PaymentStatus.success;
+  bool get isFailed => status == PaymentStatus.failed;
+  bool get isPending => status == PaymentStatus.pending;
+  bool get isCancelled => status == PaymentStatus.cancelled;
 }

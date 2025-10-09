@@ -1,0 +1,254 @@
+{
+  "@@locale": "en",
+  
+  "appTitle": "Invoiz",
+  "@appTitle": {
+    "description": "The application title"
+  },
+  
+  "home": "Home",
+  "@home": {
+    "description": "Home tab label"
+  },
+  
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile tab label"
+  },
+  
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings tab label"
+  },
+  
+  "dashboard": "Dashboard",
+  "@dashboard": {
+    "description": "Dashboard screen title"
+  },
+  
+  "businessDetails": "Business Details",
+  "@businessDetails": {
+    "description": "Business details menu item"
+  },
+  
+  "subscriptionPlans": "Subscription Plans",
+  "@subscriptionPlans": {
+    "description": "Subscription plans menu item"
+  },
+  
+  "logout": "Logout",
+  "@logout": {
+    "description": "Logout button text"
+  },
+  
+  "language": "Language",
+  "@language": {
+    "description": "Language settings menu item"
+  },
+  
+  "english": "English",
+  "@english": {
+    "description": "English language option"
+  },
+  
+  "gujarati": "ગુજરાતી",
+  "@gujarati": {
+    "description": "Gujarati language option"
+  },
+  
+  "selectLanguage": "Select Language",
+  "@selectLanguage": {
+    "description": "Language selection dialog title"
+  },
+  
+  "manageBusinessInformation": "Manage your business information",
+  "@manageBusinessInformation": {
+    "description": "Business details subtitle"
+  },
+  
+  "upgradeOrManageSubscription": "Upgrade or manage your subscription",
+  "@upgradeOrManageSubscription": {
+    "description": "Subscription plans subtitle"
+  },
+  
+  "subscriptionStatus": "Subscription Status",
+  "@subscriptionStatus": {
+    "description": "Subscription status label"
+  },
+  
+  "noActiveSubscription": "No active subscription",
+  "@noActiveSubscription": {
+    "description": "No subscription message"
+  },
+  
+  "activeSubscription": "Active Subscription",
+  "@activeSubscription": {
+    "description": "Active subscription label"
+  },
+  
+  "daysRemaining": "{count} days remaining",
+  "@daysRemaining": {
+    "description": "Days remaining in subscription",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  
+  "businessRegistered": "Business Registered",
+  "@businessRegistered": {
+    "description": "Business registered status"
+  },
+  
+  "notRegistered": "Not registered",
+  "@notRegistered": {
+    "description": "Business not registered status"
+  },
+  
+  "businessName": "Business Name",
+  "@businessName": {
+    "description": "Business name label"
+  },
+  
+  "businessType": "Business Type",
+  "@businessType": {
+    "description": "Business type label"
+  },
+  
+  "businessAddress": "Business Address",
+  "@businessAddress": {
+    "description": "Business address label"
+  },
+  
+  "businessInformation": "Business Information",
+  "@businessInformation": {
+    "description": "Business information section title"
+  },
+  
+  "contactDetails": "Contact Details",
+  "@contactDetails": {
+    "description": "Contact details section title"
+  },
+  
+  "refreshBusinessDetails": "Refresh business details",
+  "@refreshBusinessDetails": {
+    "description": "Refresh business details tooltip"
+  },
+  
+  "businessDetailsRefreshed": "Business details refreshed",
+  "@businessDetailsRefreshed": {
+    "description": "Business details refreshed message"
+  },
+  
+  "editBusinessDetails": "Edit Business Details",
+  "@editBusinessDetails": {
+    "description": "Edit business details button"
+  },
+  
+  "requestVerification": "Request Verification",
+  "@requestVerification": {
+    "description": "Request verification button"
+  },
+  
+  "editBusinessFeatureComingSoon": "Edit business feature coming soon!",
+  "@editBusinessFeatureComingSoon": {
+    "description": "Edit business feature coming soon message"
+  },
+  
+  "businessVerificationFeatureComingSoon": "Business verification feature coming soon!",
+  "@businessVerificationFeatureComingSoon": {
+    "description": "Business verification feature coming soon message"
+  },
+  
+  "noBusinessRegistered": "No Business Registered",
+  "@noBusinessRegistered": {
+    "description": "No business registered title"
+  },
+  
+  "registerBusinessToAccessFeatures": "Register your business to access all features",
+  "@registerBusinessToAccessFeatures": {
+    "description": "Register business message"
+  },
+  
+  "registerBusiness": "Register Business",
+  "@registerBusiness": {
+    "description": "Register business button"
+  },
+  
+  "businessRegistrationFeatureComingSoon": "Business registration feature coming soon!",
+  "@businessRegistrationFeatureComingSoon": {
+    "description": "Business registration feature coming soon message"
+  },
+  
+  "street": "Street",
+  "@street": {
+    "description": "Street address label"
+  },
+  
+  "city": "City",
+  "@city": {
+    "description": "City label"
+  },
+  
+  "state": "State",
+  "@state": {
+    "description": "State label"
+  },
+  
+  "pincode": "Pincode",
+  "@pincode": {
+    "description": "Pincode label"
+  },
+  
+  "country": "Country",
+  "@country": {
+    "description": "Country label"
+  },
+  
+  "phone": "Phone",
+  "@phone": {
+    "description": "Phone label"
+  },
+  
+  "email": "Email",
+  "@email": {
+    "description": "Email label"
+  },
+  
+  "website": "Website",
+  "@website": {
+    "description": "Website label"
+  },
+  
+  "businessId": "Business ID",
+  "@businessId": {
+    "description": "Business ID label"
+  },
+  
+  "status": "Status",
+  "@status": {
+    "description": "Status label"
+  },
+  
+  "gstNumber": "GST Number",
+  "@gstNumber": {
+    "description": "GST number label"
+  },
+  
+  "upiId": "UPI ID",
+  "@upiId": {
+    "description": "UPI ID label"
+  },
+  
+  "verified": "Verified",
+  "@verified": {
+    "description": "Verified status"
+  },
+  
+  "pending": "Pending",
+  "@pending": {
+    "description": "Pending status"
+  }
+}

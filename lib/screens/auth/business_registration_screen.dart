@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/subscription_guard_service.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/loading_button.dart';
@@ -31,6 +32,9 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
 
   @override
   void dispose() {
+    // Clear registration flow flag when disposing the screen
+    SubscriptionGuardService.setRegistrationFlow(false);
+    
     _businessNameController.dispose();
     _descriptionController.dispose();
     _streetController.dispose();
@@ -272,41 +276,60 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       
       final businessData = {
-        'businessName': _businessNameController.text.trim(),
-        'description': _descriptionController.text.trim(),
-        'address': {
+        'business_name': _businessNameController.text.trim(),
+        'business_type': _descriptionController.text.trim().isEmpty ? 'General Business' : _descriptionController.text.trim(),
+        'business_address': {
           'street': _streetController.text.trim(),
           'city': _cityController.text.trim(),
           'state': _stateController.text.trim(),
-          'postalCode': _postalCodeController.text.trim(),
+          'pincode': _postalCodeController.text.trim(),
+          'country': 'India',
         },
-        'contactInfo': {
+        'contact_details': {
           'phone': _phoneController.text.trim(),
           'email': _emailController.text.trim(),
         },
-        'gstNumber': _gstController.text.trim(),
-        'upiId': _upiController.text.trim(),
+        'gst_number': _gstController.text.trim().isEmpty ? null : _gstController.text.trim(),
+        'upi_id': _upiController.text.trim(),
       };
 
       await authProvider.registerBusiness(businessData);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Business registered successfully!'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        if (authProvider.error == null) {
+          // Clear registration flow flag since business registration is complete
+          SubscriptionGuardService.setRegistrationFlow(false);
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Business registered successfully!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
 
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => const SubscriptionPlansScreen(),
-          ),
-          (route) => false,
-        );
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => const SubscriptionPlansScreen(),
+            ),
+            (route) => false,
+          );
+        } else {
+          // Clear registration flow flag on error
+          SubscriptionGuardService.setRegistrationFlow(false);
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authProvider.error ?? 'Business registration failed'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
+        // Clear registration flow flag on error
+        SubscriptionGuardService.setRegistrationFlow(false);
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to register business: ${e.toString()}'),

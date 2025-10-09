@@ -3,16 +3,23 @@ import 'package:provider/provider.dart';
 import '../../config/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../models/user_model.dart';
+import '../../services/language_service.dart';
+import '../../widgets/language_selection_dialog.dart';
+import '../../l10n/app_localizations.dart';
 import '../auth/welcome_screen.dart';
+import '../business/business_details_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Profile',
+      appBar: CustomAppBar(
+        title: localizations.profile,
         showBackButton: false,
       ),
       body: Consumer<AuthProvider>(
@@ -56,9 +63,44 @@ class ProfileScreen extends StatelessWidget {
                           color: AppColors.textOnPrimary.withOpacity(0.8),
                         ),
                       ),
+                      if (user?.hasBusiness == true) ...[
+                        const SizedBox(height: AppSizes.sm),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSizes.md,
+                            vertical: AppSizes.sm,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.business,
+                                size: AppSizes.iconSm,
+                                color: AppColors.textOnPrimary,
+                              ),
+                              const SizedBox(width: AppSizes.xs),
+                              Text(
+                                user!.businessInfo!.businessName,
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.textOnPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
+                const SizedBox(height: AppSizes.lg),
+
+                // Subscription Status Card
+                _buildSubscriptionCard(user?.subscription),
                 const SizedBox(height: AppSizes.lg),
 
                 // Profile Options
@@ -72,18 +114,23 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 _buildProfileOption(
                   icon: Icons.business_outlined,
-                  title: 'Business Details',
-                  subtitle: 'Manage your business information',
+                  title: localizations.businessDetails,
+                  subtitle: user?.businessInfo?.businessName ?? localizations.manageBusinessInformation,
                   onTap: () {
-                    _showComingSoon(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BusinessDetailsScreen(),
+                      ),
+                    );
                   },
                 ),
                 _buildProfileOption(
                   icon: Icons.subscriptions_outlined,
-                  title: 'Subscription',
-                  subtitle: 'View and manage your subscription',
+                  title: localizations.subscriptionPlans,
+                  subtitle: localizations.upgradeOrManageSubscription,
                   onTap: () {
-                    _showComingSoon(context);
+                    Navigator.pushNamed(context, '/subscription-plans');
                   },
                 ),
                 _buildProfileOption(
@@ -92,6 +139,25 @@ class ProfileScreen extends StatelessWidget {
                   subtitle: 'App preferences and configurations',
                   onTap: () {
                     _showComingSoon(context);
+                  },
+                ),
+                Consumer<LanguageService>(
+                  builder: (context, languageService, child) {
+                    final localizations = AppLocalizations.of(context)!;
+                    final currentLanguage = languageService.supportedLanguages
+                        .firstWhere((lang) => lang['code'] == languageService.currentLocale.languageCode);
+                    
+                    return _buildProfileOption(
+                      icon: Icons.language_outlined,
+                      title: localizations.language,
+                      subtitle: currentLanguage['nativeName']!,
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => const LanguageSelectionDialog(),
+                        );
+                      },
+                    );
                   },
                 ),
                 _buildProfileOption(
@@ -116,12 +182,15 @@ class ProfileScreen extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () => _showLogoutDialog(context, authProvider),
+                    onPressed: () {
+                      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                      _showLogoutDialog(context, authProvider);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.error,
-                      foregroundColor: AppColors.textOnPrimary,
+                      foregroundColor: Colors.white,
                     ),
-                    child: const Text('Logout'),
+                    child: Text(localizations.logout),
                   ),
                 ),
               ],
@@ -163,6 +232,234 @@ class ProfileScreen extends StatelessWidget {
         onTap: onTap,
       ),
     );
+  }
+
+  Widget _buildSubscriptionCard(SubscriptionInfo? subscription) {
+    if (subscription == null) {
+      // No subscription
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSizes.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.subscriptions_outlined,
+                    color: AppColors.warning,
+                    size: AppSizes.iconMd,
+                  ),
+                  const SizedBox(width: AppSizes.sm),
+                  Text(
+                    'Subscription Status',
+                    style: AppTextStyles.h6.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSizes.md),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.md,
+                  vertical: AppSizes.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                  border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: AppColors.warning,
+                      size: AppSizes.iconSm,
+                    ),
+                    const SizedBox(width: AppSizes.sm),
+                    Expanded(
+                      child: Text(
+                        'No active subscription',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.warning,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSizes.sm),
+              Text(
+                'Subscribe to unlock premium features and enjoy unlimited access to all tools.',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Has subscription
+    final bool isActive = subscription.isActive;
+    final bool isExpired = subscription.isExpired;
+    final Color statusColor = isActive 
+        ? AppColors.success 
+        : isExpired 
+            ? AppColors.error 
+            : AppColors.warning;
+    
+    final IconData statusIcon = isActive 
+        ? Icons.check_circle_outline 
+        : isExpired 
+            ? Icons.error_outline 
+            : Icons.warning_outlined;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSizes.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.subscriptions_outlined,
+                  color: AppColors.primary,
+                  size: AppSizes.iconMd,
+                ),
+                const SizedBox(width: AppSizes.sm),
+                Text(
+                  'Subscription Status',
+                  style: AppTextStyles.h6.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSizes.md),
+            
+            // Plan Name
+            Text(
+              subscription.planDisplayName,
+              style: AppTextStyles.h5.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: AppSizes.sm),
+            
+            // Status Badge
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.md,
+                vertical: AppSizes.sm,
+              ),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                border: Border.all(color: statusColor.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    statusIcon,
+                    color: statusColor,
+                    size: AppSizes.iconSm,
+                  ),
+                  const SizedBox(width: AppSizes.sm),
+                  Text(
+                    isActive 
+                        ? 'Active' 
+                        : isExpired 
+                            ? 'Expired' 
+                            : subscription.status?.toUpperCase() ?? 'INACTIVE',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: statusColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSizes.md),
+            
+            // Subscription Details
+            _buildSubscriptionDetail(
+              'Plan Type',
+              subscription.planDisplayName,
+              Icons.card_membership_outlined,
+            ),
+            
+            if (subscription.startDate != null)
+              _buildSubscriptionDetail(
+                'Start Date',
+                _formatDate(subscription.startDate!),
+                Icons.calendar_today_outlined,
+              ),
+            
+            if (subscription.endDate != null)
+              _buildSubscriptionDetail(
+                'End Date',
+                _formatDate(subscription.endDate!),
+                Icons.event_outlined,
+              ),
+            
+            _buildSubscriptionDetail(
+              'Days Remaining',
+              subscription.daysRemaining > 0 
+                  ? '${subscription.daysRemaining} days'
+                  : 'Expired',
+              Icons.schedule_outlined,
+              valueColor: subscription.daysRemaining > 7 
+                  ? AppColors.success
+                  : subscription.daysRemaining > 0
+                      ? AppColors.warning
+                      : AppColors.error,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionDetail(String label, String value, IconData icon, {Color? valueColor}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSizes.sm),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: AppSizes.iconSm,
+            color: AppColors.textSecondary,
+          ),
+          const SizedBox(width: AppSizes.sm),
+          Text(
+            '$label: ',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: valueColor ?? AppColors.textPrimary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 
   void _showComingSoon(BuildContext context) {

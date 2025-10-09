@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/subscription_guard_service.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../subscription/subscription_status_screen.dart';
 import 'profile_screen.dart';
+import '../products/products_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,16 +15,50 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _selectedIndex = 0;
   
   static const List<Widget> _screens = [
     DashboardTab(),
-    InvoicesTab(),
-    CustomersTab(),
+    ProductsTab(),
     ReportsTab(),
     ProfileTab(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _performInitialSubscriptionCheck();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    
+    // Check subscription when app becomes active (resumed from background)
+    if (state == AppLifecycleState.resumed) {
+      _performSubscriptionCheck();
+    }
+  }
+
+  Future<void> _performInitialSubscriptionCheck() async {
+    // Small delay to ensure the widget is fully built
+    await Future.delayed(const Duration(milliseconds: 500));
+    await _performSubscriptionCheck();
+  }
+
+  Future<void> _performSubscriptionCheck() async {
+    if (mounted) {
+      await SubscriptionGuardService.performPeriodicSubscriptionCheck(context);
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -49,14 +85,9 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Dashboard',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_outlined),
-            activeIcon: Icon(Icons.receipt),
-            label: 'Invoices',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people_outline),
-            activeIcon: Icon(Icons.people),
-            label: 'Customers',
+            icon: Icon(Icons.inventory_2_outlined),
+            activeIcon: Icon(Icons.inventory_2),
+            label: 'Products',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.analytics_outlined),
@@ -192,12 +223,12 @@ class DashboardTab extends StatelessWidget {
                     Expanded(
                       child: _buildQuickActionCard(
                         context,
-                        icon: Icons.add,
-                        title: 'New Invoice',
-                        subtitle: 'Create invoice',
+                        icon: Icons.add_box,
+                        title: 'Add Product',
+                        subtitle: 'New product',
                         color: AppColors.primary,
                         onTap: () {
-                          // TODO: Navigate to create invoice
+                          // TODO: Navigate to create product
                           _showComingSoon(context);
                         },
                       ),
@@ -230,19 +261,19 @@ class DashboardTab extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _buildSummaryCard(
-                        title: 'Total Invoices',
-                        value: '0',
-                        icon: Icons.receipt,
-                        color: AppColors.info,
+                        title: 'Total Revenue',
+                        value: '₹0',
+                        icon: Icons.currency_rupee,
+                        color: AppColors.success,
                       ),
                     ),
                     const SizedBox(width: AppSizes.md),
                     Expanded(
                       child: _buildSummaryCard(
-                        title: 'Total Revenue',
-                        value: '₹0',
-                        icon: Icons.currency_rupee,
-                        color: AppColors.success,
+                        title: 'Products',
+                        value: '0',
+                        icon: Icons.inventory_2,
+                        color: AppColors.secondary,
                       ),
                     ),
                   ],
@@ -252,19 +283,10 @@ class DashboardTab extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _buildSummaryCard(
-                        title: 'Pending',
-                        value: '₹0',
+                        title: 'Pending Orders',
+                        value: '0',
                         icon: Icons.pending,
                         color: AppColors.warning,
-                      ),
-                    ),
-                    const SizedBox(width: AppSizes.md),
-                    Expanded(
-                      child: _buildSummaryCard(
-                        title: 'Customers',
-                        value: '0',
-                        icon: Icons.people,
-                        color: AppColors.secondary,
                       ),
                     ),
                   ],
@@ -379,45 +401,14 @@ class DashboardTab extends StatelessWidget {
 }
 
 // Placeholder tabs
-class InvoicesTab extends StatelessWidget {
-  const InvoicesTab({super.key});
+
+
+class ProductsTab extends StatelessWidget {
+  const ProductsTab({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: CustomAppBar(
-        title: 'Invoices',
-        showBackButton: false,
-      ),
-      body: Center(
-        child: Text(
-          'Invoices Screen\nComing Soon!',
-          style: AppTextStyles.h4,
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-}
-
-class CustomersTab extends StatelessWidget {
-  const CustomersTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: CustomAppBar(
-        title: 'Customers',
-        showBackButton: false,
-      ),
-      body: Center(
-        child: Text(
-          'Customers Screen\nComing Soon!',
-          style: AppTextStyles.h4,
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
+   Widget build(BuildContext context) {
+    return const ProductsScreen();
   }
 }
 

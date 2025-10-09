@@ -6,6 +6,7 @@ import '../../config/app_theme.dart';
 import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/loading_button.dart';
+import '../../services/subscription_guard_service.dart';
 import 'business_registration_screen.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
@@ -71,10 +72,14 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     );
 
     if (success) {
+      // Set registration flow flag to prevent subscription checks
+      SubscriptionGuardService.setRegistrationFlow(true);
+      
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => const BusinessRegistrationScreen(),
+          settings: const RouteSettings(name: '/business-registration'),
         ),
       );
     } else {

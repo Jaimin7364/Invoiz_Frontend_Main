@@ -1,0 +1,101 @@
+{
+  "@@locale": "gu",
+  
+  "appTitle": "ઇન્વોઇઝ",
+  
+  "home": "હોમ",
+  
+  "profile": "પ્રોફાઇલ",
+  
+  "settings": "સેટિંગ્સ",
+  
+  "dashboard": "ડેશબોર્ડ",
+  
+  "businessDetails": "બિઝનેસ વિગતો",
+  
+  "subscriptionPlans": "સબ્સ્ક્રિપ્શન પ્લાન્સ",
+  
+  "logout": "લોગઆઉટ",
+  
+  "language": "ભાષા",
+  
+  "english": "English",
+  
+  "gujarati": "ગુજરાતી",
+  
+  "selectLanguage": "ભાષા પસંદ કરો",
+  
+  "manageBusinessInformation": "તમારી બિઝનેસની માહિતી મેનેજ કરો",
+  
+  "upgradeOrManageSubscription": "તમારું સબ્સ્ક્રિપ્શન અપગ્રેડ અથવા મેનેજ કરો",
+  
+  "subscriptionStatus": "સબ્સ્ક્રિપ્શન સ્થિતિ",
+  
+  "noActiveSubscription": "કોઈ સક્રિય સબ્સ્ક્રિપ્શન નથી",
+  
+  "activeSubscription": "સક્રિય સબ્સ્ક્રિપ્શન",
+  
+  "daysRemaining": "{count} દિવસ બાકી",
+  
+  "businessRegistered": "બિઝનેસ નોંધાયેલ",
+  
+  "notRegistered": "નોંધાયેલ નથી",
+  
+  "businessName": "બિઝનેસનું નામ",
+  
+  "businessType": "બિઝનેસનો પ્રકાર",
+  
+  "businessAddress": "બિઝનેસનું સરનામું",
+  
+  "businessInformation": "બિઝનેસ માહિતી",
+  
+  "contactDetails": "સંપર્ક વિગતો",
+  
+  "refreshBusinessDetails": "બિઝનેસ વિગતો રિફ્રેશ કરો",
+  
+  "businessDetailsRefreshed": "બિઝનેસ વિગતો રિફ્રેશ થઈ",
+  
+  "editBusinessDetails": "બિઝનેસ વિગતો સંપાદિત કરો",
+  
+  "requestVerification": "વેરિફિકેશનની વિનંતી કરો",
+  
+  "editBusinessFeatureComingSoon": "બિઝનેસ સંપાદન ફીચર ટૂંક સમયમાં આવશે!",
+  
+  "businessVerificationFeatureComingSoon": "બિઝનેસ વેરિફિકેશન ફીચર ટૂંક સમયમાં આવશે!",
+  
+  "noBusinessRegistered": "કોઈ બિઝનેસ નોંધાયેલ નથી",
+  
+  "registerBusinessToAccessFeatures": "બધી સુવિધાઓ મેળવવા માટે તમારી બિઝનેસ નોંધાવો",
+  
+  "registerBusiness": "બિઝનેસ નોંધાવો",
+  
+  "businessRegistrationFeatureComingSoon": "બિઝનેસ રજિસ્ટ્રેશન ફીચર ટૂંક સમયમાં આવશે!",
+  
+  "street": "શેરી",
+  
+  "city": "શહેર",
+  
+  "state": "રાજ્ય",
+  
+  "pincode": "પિનકોડ",
+  
+  "country": "દેશ",
+  
+  "phone": "ફોન",
+  
+  "email": "ઇમેઇલ",
+  
+  "website": "વેબસાઇટ",
+  
+  "businessId": "બિઝનેસ આઇડી",
+  
+  "status": "સ્થિતિ",
+  
+  "gstNumber": "જીએસટી નંબર",
+  
+  "upiId": "યુપીઆઇ આઇડી",
+  
+  "verified": "ચકાસાયેલ",
+  
+  "pending": "પેન્ડિંગ"
+}

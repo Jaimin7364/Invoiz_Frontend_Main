@@ -4,12 +4,20 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../config/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/razorpay_service.dart';
+import '../../services/subscription_guard_service.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/loading_button.dart';
 import '../home/home_screen.dart';
 
 class SubscriptionPlansScreen extends StatefulWidget {
-  const SubscriptionPlansScreen({super.key});
+  final bool canGoBack;
+  final String? message;
+  
+  const SubscriptionPlansScreen({
+    super.key,
+    this.canGoBack = true,
+    this.message,
+  });
 
   @override
   State<SubscriptionPlansScreen> createState() => _SubscriptionPlansScreenState();
@@ -96,11 +104,27 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Choose Your Plan',
-        showBackButton: true,
-      ),
+    final authProvider = Provider.of<AuthProvider>(context);
+    final bool isSubscriptionExpired = authProvider.isLoggedIn && 
+        (!authProvider.hasActiveSubscription || authProvider.isSubscriptionExpired);
+    
+    return PopScope(
+      canPop: widget.canGoBack && !isSubscriptionExpired,
+      onPopInvoked: (didPop) {
+        if (!didPop && !widget.canGoBack) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please select a subscription plan to continue'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: CustomAppBar(
+          title: isSubscriptionExpired ? 'Renew Your Plan' : 'Choose Your Plan',
+          showBackButton: widget.canGoBack && !isSubscriptionExpired,
+        ),
       body: Column(
         children: [
           // Header
@@ -109,8 +133,34 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
             padding: const EdgeInsets.all(AppSizes.lg),
             child: Column(
               children: [
+                // Warning message for expired subscription
+                if (widget.message != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(AppSizes.md),
+                    margin: const EdgeInsets.only(bottom: AppSizes.md),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                      border: Border.all(color: Colors.orange),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.warning_amber, color: Colors.orange),
+                        const SizedBox(width: AppSizes.sm),
+                        Expanded(
+                          child: Text(
+                            widget.message!,
+                            style: const TextStyle(color: Colors.orange),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 Text(
-                  'Select a Subscription Plan',
+                  isSubscriptionExpired 
+                      ? 'Your subscription has expired. Choose a plan to continue.'
+                      : 'Select a Subscription Plan',
                   style: AppTextStyles.h3.copyWith(
                     color: AppColors.primary,
                   ),
@@ -323,6 +373,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
           ),
         ],
       ),
+      ),
     );
   }
 
@@ -424,22 +475,51 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
       if (verifyResponse.isSuccess) {
         // Update auth provider with new subscription info
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        await authProvider.refreshUser();
-
+        
+        // Wait for the subscription to be active before proceeding
+        final hasActiveSubscription = await authProvider.waitForActiveSubscription();
+        
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Subscription activated successfully!'),
-              backgroundColor: AppColors.success,
-            ),
-          );
+          if (hasActiveSubscription) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Subscription activated successfully!'),
+                backgroundColor: AppColors.success,
+              ),
+            );
 
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (context) => const HomeScreen(),
-            ),
-            (route) => false,
-          );
+            // Bypass the next subscription check to avoid redirect loop
+            SubscriptionGuardService.bypassNextCheck();
+            
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (context) => const HomeScreen(),
+              ),
+              (route) => false,
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Payment successful, but subscription activation is pending. Please wait...'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+            
+            // Try refreshing one more time after a delay
+            Future.delayed(const Duration(seconds: 3), () async {
+              await authProvider.getCurrentUser();
+              if (authProvider.hasActiveSubscription && !authProvider.isSubscriptionExpired) {
+                if (mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (context) => const HomeScreen(),
+                    ),
+                    (route) => false,
+                  );
+                }
+              }
+            });
+          }
         }
       } else {
         throw Exception(verifyResponse.error ?? 'Payment verification failed');

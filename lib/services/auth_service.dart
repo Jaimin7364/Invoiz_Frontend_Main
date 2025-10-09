@@ -54,6 +54,7 @@ class AuthService {
           // Save token and user data
           final token = data['data']['token'];
           await _storageService.saveToken(token);
+          await _storageService.saveTokenTimestamp();
           
           // Return user data
           final user = User.fromJson(data['data']['user']);
@@ -105,6 +106,7 @@ class AuthService {
           // Save token and user data
           final token = data['data']['token'];
           await _storageService.saveToken(token);
+          await _storageService.saveTokenTimestamp();
           
           // Return user data
           final user = User.fromJson(data['data']['user']);

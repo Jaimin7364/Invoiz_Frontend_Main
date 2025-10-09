@@ -141,11 +141,36 @@ class StorageService {
     return token != null && token.isNotEmpty;
   }
 
+  // Save token timestamp for tracking
+  Future<void> saveTokenTimestamp() async {
+    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    await _preferences?.setString('token_timestamp', timestamp);
+  }
+
+  // Get token timestamp
+  Future<DateTime?> getTokenTimestamp() async {
+    final timestampStr = _preferences?.getString('token_timestamp');
+    if (timestampStr != null) {
+      return DateTime.fromMillisecondsSinceEpoch(int.parse(timestampStr));
+    }
+    return null;
+  }
+
+  // Check if token is expired (client-side estimation)
+  Future<bool> isTokenExpired() async {
+    final timestamp = await getTokenTimestamp();
+    if (timestamp == null) return true;
+    
+    final tokenAge = DateTime.now().difference(timestamp).inDays;
+    return tokenAge >= AppConfig.tokenLifetimeDays;
+  }
+
   // Clear all user data (logout)
   Future<void> clearUserData() async {
     await deleteToken();
     await deleteUser();
     await deleteBusiness();
+    await _preferences?.remove('token_timestamp');
   }
 
   // Clear all app data

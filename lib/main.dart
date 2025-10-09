@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'config/app_theme.dart';
@@ -6,7 +7,11 @@ import 'providers/auth_provider.dart';
 import 'services/api_service.dart';
 import 'services/storage_service.dart';
 import 'services/razorpay_service.dart';
+import 'services/language_service.dart';
+import 'services/subscription_route_observer.dart';
+import 'providers/product_provider.dart';
 import 'screens/splash_screen.dart';
+import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,22 +21,44 @@ void main() async {
   await StorageService().initialize();
   RazorpayService().initialize();
   
-  runApp(const InvoizApp());
+  // Initialize language service
+  final languageService = LanguageService();
+  await languageService.init();
+  
+  runApp(InvoizApp(languageService: languageService));
 }
 
 class InvoizApp extends StatelessWidget {
-  const InvoizApp({super.key});
+  final LanguageService languageService;
+  
+  const InvoizApp({super.key, required this.languageService});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ProductProvider()),
+        ChangeNotifierProvider.value(value: languageService),
       ],
-      child: MaterialApp(
-        title: 'Invoiz',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
+      child: Consumer<LanguageService>(
+        builder: (context, languageService, child) {
+          return MaterialApp(
+            title: 'Invoiz',
+            debugShowCheckedModeBanner: false,
+            navigatorObservers: [SubscriptionRouteObserver()],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('en'),
+              Locale('gu'),
+            ],
+            locale: languageService.currentLocale,
+            theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: AppColors.primary,
             brightness: Brightness.light,
@@ -88,6 +115,8 @@ class InvoizApp extends StatelessWidget {
           ),
         ),
         home: const SplashScreen(),
+      );
+        },
       ),
     );
   }

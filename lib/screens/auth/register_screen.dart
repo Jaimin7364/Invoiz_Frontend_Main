@@ -28,6 +28,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _agreeToTerms = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Ensure auth provider is not in loading state when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      // Clear any stuck loading state that might be left from initialization
+      if (authProvider.isLoading) {
+        authProvider.clearLoading();
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _fullNameController.dispose();
     _emailController.dispose();

@@ -1,7 +1,7 @@
 class AppConfig {
   // API Configuration
-  static const String baseUrl = 'http://localhost:5000/api';
-  static const String socketUrl = 'http://localhost:5000';
+  static const String baseUrl = 'http://20.244.93.108/api';
+  static const String socketUrl = 'http://20.244.93.108';
   
   // API Endpoints
   static const String authEndpoint = '$baseUrl/auth';
@@ -10,7 +10,7 @@ class AppConfig {
   static const String userEndpoint = '$baseUrl/user';
   
   // Razorpay Configuration
-  static const String razorpayKeyId = 'your_razorpay_key_id'; // Will be fetched from API
+  static const String razorpayKeyId = 'your_razorpay_key_id';
   
   // App Configuration
   static const String appName = 'Invoiz';
@@ -21,10 +21,19 @@ class AppConfig {
   static const String userKey = 'user_data';
   static const String businessKey = 'business_data';
   static const String onboardingKey = 'onboarding_completed';
+  static const String subscriptionCheckKey = 'last_subscription_check';
+  
+  // Subscription Configuration
+  static const int subscriptionCheckIntervalHours = 6; // Check every 6 hours
+  static const int subscriptionWarningDays = 3; // Warn when 3 days left
   
   // Timeouts
   static const int connectionTimeout = 30000; // 30 seconds
-  static const int receiveTimeout = 30000; // 30 seconds
+  static const int receiveTimeout = 30000;
+  
+  // Token Configuration
+  static const int tokenLifetimeDays = 1825; // 5 years (5 * 365 days)
+  static const bool autoRefreshToken = false; // Disabled for long-lived tokens
   
   // OTP Configuration
   static const int otpLength = 6;
@@ -34,7 +43,7 @@ class AppConfig {
   static const Map<String, Map<String, dynamic>> subscriptionPlans = {
     'basic': {
       'name': 'Basic Plan',
-      'price': 100,
+      'price': 1,
       'duration': '1 month',
       'color': 0xFF4CAF50,
     },

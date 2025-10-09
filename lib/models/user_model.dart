@@ -1,3 +1,5 @@
+import 'business_model.dart';
+
 class User {
   final String userId;
   final String fullName;
@@ -10,6 +12,7 @@ class User {
   final DateTime createdAt;
   final SubscriptionInfo? subscription;
   final String? businessId;
+  final Business? businessInfo;
 
   User({
     required this.userId,
@@ -23,6 +26,7 @@ class User {
     required this.createdAt,
     this.subscription,
     this.businessId,
+    this.businessInfo,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -42,6 +46,9 @@ class User {
           ? SubscriptionInfo.fromJson(json['subscription_info']) 
           : null,
       businessId: json['business_id'],
+      businessInfo: json['business_info'] != null 
+          ? Business.fromJson(json['business_info']) 
+          : null,
     );
   }
 
@@ -58,6 +65,7 @@ class User {
       'created_at': createdAt.toIso8601String(),
       'subscription_info': subscription?.toJson(),
       'business_id': businessId,
+      'business_info': businessInfo?.toJson(),
     };
   }
 
@@ -73,6 +81,7 @@ class User {
     DateTime? createdAt,
     SubscriptionInfo? subscription,
     String? businessId,
+    Business? businessInfo,
   }) {
     return User(
       userId: userId ?? this.userId,
@@ -86,14 +95,24 @@ class User {
       createdAt: createdAt ?? this.createdAt,
       subscription: subscription ?? this.subscription,
       businessId: businessId ?? this.businessId,
+      businessInfo: businessInfo ?? this.businessInfo,
     );
   }
 
   bool get hasActiveSubscription => 
-      subscription != null && subscription!.status == 'active';
+      subscription != null && 
+      subscription!.status == 'active' && 
+      subscription!.daysRemaining > 0;
 
   bool get isSubscriptionExpired => 
-      subscription == null || subscription!.daysRemaining <= 0;
+      subscription == null || 
+      subscription!.status != 'active' || 
+      subscription!.daysRemaining <= 0;
+
+  bool get hasBusiness => businessInfo != null && businessId != null;
+  
+  bool get isBusinessVerified => 
+      hasBusiness && businessInfo!.verificationStatus == 'Verified';
 }
 
 class SubscriptionInfo {
@@ -101,15 +120,15 @@ class SubscriptionInfo {
   final String? status;
   final DateTime? startDate;
   final DateTime? endDate;
-  final int daysRemaining;
+  final int? _staticDaysRemaining; // Keep for backward compatibility
 
   SubscriptionInfo({
     this.planType,
     this.status,
     this.startDate,
     this.endDate,
-    this.daysRemaining = 0,
-  });
+    int daysRemaining = 0,
+  }) : _staticDaysRemaining = daysRemaining;
 
   factory SubscriptionInfo.fromJson(Map<String, dynamic> json) {
     return SubscriptionInfo(
@@ -135,6 +154,48 @@ class SubscriptionInfo {
     };
   }
 
+  /// Dynamic calculation of days remaining based on current date and end date
+  int get daysRemaining {
+    if (endDate == null) return _staticDaysRemaining ?? 0;
+    
+    final now = DateTime.now();
+    // Set to start of current day for accurate comparison
+    final currentDayStart = DateTime(now.year, now.month, now.day);
+    
+    // Calculate difference from start of current day to end date
+    final difference = endDate!.difference(currentDayStart);
+    
+    // Return the number of complete days remaining
+    // If subscription ends today, it's 0 days remaining
+    return difference.inDays >= 0 ? difference.inDays : 0;
+  }
+
+  /// Get the total duration of the subscription in days
+  int get totalSubscriptionDays {
+    if (startDate == null || endDate == null) return 0;
+    return endDate!.difference(startDate!).inDays + 1;
+  }
+
+  /// Get the number of days used so far
+  int get daysUsed {
+    if (startDate == null) return 0;
+    
+    final now = DateTime.now();
+    final startOfDay = DateTime(startDate!.year, startDate!.month, startDate!.day);
+    final difference = now.difference(startOfDay);
+    
+    return difference.inDays >= 0 ? difference.inDays + 1 : 0;
+  }
+
+  /// Get subscription progress as a percentage (0.0 to 1.0)
+  double get subscriptionProgress {
+    final total = totalSubscriptionDays;
+    if (total <= 0) return 0.0;
+    
+    final used = daysUsed;
+    return (used / total).clamp(0.0, 1.0);
+  }
+
   String get planDisplayName {
     switch (planType) {
       case 'basic':
@@ -153,4 +214,20 @@ class SubscriptionInfo {
   bool get isActive => status == 'active' && daysRemaining > 0;
   bool get isExpired => status == 'expired' || daysRemaining <= 0;
   bool get isCancelled => status == 'cancelled';
+
+  /// Helper method to format remaining time in a user-friendly way
+  String get remainingTimeFormatted {
+    final days = daysRemaining;
+    if (days <= 0) return 'Expired';
+    if (days == 1) return '1 day';
+    if (days < 30) return '$days days';
+    
+    final months = (days / 30).floor();
+    final remainingDays = days % 30;
+    
+    if (months == 1 && remainingDays == 0) return '1 month';
+    if (months == 1) return '1 month, $remainingDays ${remainingDays == 1 ? 'day' : 'days'}';
+    if (remainingDays == 0) return '$months months';
+    return '$months months, $remainingDays ${remainingDays == 1 ? 'day' : 'days'}';
+  }
 }

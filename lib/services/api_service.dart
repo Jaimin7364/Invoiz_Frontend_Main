@@ -44,9 +44,13 @@ class ApiService {
         onError: (error, handler) async {
           // Handle token expiration
           if (error.response?.statusCode == 401) {
+            // Clear expired token and user data
             await _storage.delete(key: AppConfig.tokenKey);
             await _storage.delete(key: AppConfig.userKey);
-            // You can add navigation to login screen here
+            await _storage.delete(key: 'token_timestamp');
+            
+            print('Token expired or invalid. Cleared authentication data.');
+            // You can add navigation to login screen here if needed
           }
           handler.next(error);
         },

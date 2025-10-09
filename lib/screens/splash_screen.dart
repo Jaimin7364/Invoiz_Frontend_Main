@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../config/app_theme.dart';
 import '../providers/auth_provider.dart';
+import '../services/subscription_guard_service.dart';
 import 'auth/welcome_screen.dart';
 import 'home/home_screen.dart';
 
@@ -62,17 +63,26 @@ class _SplashScreenState extends State<SplashScreen>
     if (mounted) {
       // Navigate based on auth status
       if (authProvider.isLoggedIn) {
-        if (authProvider.hasActiveSubscription) {
+        try {
+          // Check subscription status for logged-in users
+          final hasValidSubscription = await SubscriptionGuardService.checkSubscriptionAccess(context);
+          
+          if (hasValidSubscription) {
+            // User has active subscription, navigate to home
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+            );
+          }
+          // If subscription is invalid, SubscriptionGuardService already handles redirect
+        } catch (e) {
+          print('Splash: Error checking subscription: $e');
+          // On error, try to navigate to home anyway and let guards handle it
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const HomeScreen()),
           );
-        } else {
-          // Navigate to subscription screen
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-          );
         }
       } else {
+        // User not logged in, go to welcome screen
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const WelcomeScreen()),
         );
