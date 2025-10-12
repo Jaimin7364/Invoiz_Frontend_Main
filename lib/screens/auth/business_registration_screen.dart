@@ -29,6 +29,28 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
   final _upiController = TextEditingController();
 
   bool _isLoading = false;
+  String? _selectedBusinessType;
+  
+  final List<String> _businessTypes = [
+    'Grocery',
+    'Electronics', 
+    'Pharmacy',
+    'Restaurant',
+    'Clothing',
+    'Hardware',
+    'Stationery',
+    'Mobile Shop',
+    'Medical Store',
+    'General Store',
+    'Automobile',
+    'Beauty & Cosmetics',
+    'Books & Media',
+    'Furniture',
+    'Jewelry',
+    'Sports & Fitness',
+    'Toys & Games',
+    'Other'
+  ];
 
   @override
   void dispose() {
@@ -55,12 +77,13 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
         title: 'Business Registration',
         showBackButton: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSizes.md),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
               Text(
@@ -89,6 +112,45 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter business name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: AppSizes.md),
+              
+              // Business Type Dropdown
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  labelText: 'Business Type',
+                  hintText: 'Select your business type',
+                  prefixIcon: const Icon(Icons.business),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                    borderSide: const BorderSide(color: AppColors.primary),
+                  ),
+                ),
+                value: _selectedBusinessType,
+                items: _businessTypes.map((String type) {
+                  return DropdownMenuItem<String>(
+                    value: type,
+                    child: Text(type),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedBusinessType = newValue;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select a business type';
                   }
                   return null;
                 },
@@ -249,9 +311,10 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
               const SizedBox(height: AppSizes.lg),
             ],
           ),
-        ),
-      ),
-    );
+        ), // Form
+      ), // SingleChildScrollView
+    ), // SafeArea and body
+  ); // Scaffold
   }
 
   Widget _buildSectionTitle(String title) {
@@ -277,7 +340,7 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
       
       final businessData = {
         'business_name': _businessNameController.text.trim(),
-        'business_type': _descriptionController.text.trim().isEmpty ? 'General Business' : _descriptionController.text.trim(),
+        'business_type': _selectedBusinessType ?? 'Other',
         'business_address': {
           'street': _streetController.text.trim(),
           'city': _cityController.text.trim(),
@@ -292,6 +355,11 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
         'gst_number': _gstController.text.trim().isEmpty ? null : _gstController.text.trim(),
         'upi_id': _upiController.text.trim(),
       };
+      
+      // Add description if provided
+      if (_descriptionController.text.trim().isNotEmpty) {
+        businessData['description'] = _descriptionController.text.trim();
+      }
 
       await authProvider.registerBusiness(businessData);
 

@@ -76,28 +76,29 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           ),
         ],
       ),
-      body: Consumer<InvoiceProvider>(
-        builder: (context, invoiceProvider, child) {
-          if (!invoiceProvider.hasSelectedProducts) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.shopping_cart_outlined,
-                    size: 64,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(height: AppSizes.md),
-                  Text(
-                    'No products selected',
-                    style: AppTextStyles.h6.copyWith(
+      body: SafeArea(
+        child: Consumer<InvoiceProvider>(
+          builder: (context, invoiceProvider, child) {
+            if (!invoiceProvider.hasSelectedProducts) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.shopping_cart_outlined,
+                      size: 64,
                       color: AppColors.textSecondary,
                     ),
-                  ),
-                  const SizedBox(height: AppSizes.sm),
-                  Text(
-                    'Go back and select products to create an invoice',
+                    const SizedBox(height: AppSizes.md),
+                    Text(
+                      'No products selected',
+                      style: AppTextStyles.h6.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.sm),
+                    Text(
+                      'Go back and select products to create an invoice',
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -406,8 +407,9 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             ],
           );
         },
-      ),
-    );
+      ), // Consumer
+    ), // SafeArea
+  ); // Scaffold
   }
 
   Widget _buildSummaryRow(String label, String value, {bool isDiscount = false, bool isTotal = false}) {

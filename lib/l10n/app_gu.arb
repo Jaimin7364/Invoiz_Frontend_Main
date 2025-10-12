@@ -97,5 +97,301 @@
   
   "verified": "ચકાસાયેલ",
   
-  "pending": "પેન્ડિંગ"
+  "pending": "પેન્ડિંગ",
+
+  "products": "પ્રોડક્ટ્સ",
+
+  "invoices": "ઇન્વોઇસ",
+
+  "createInvoice": "ઇન્વોઇસ બનાવો",
+
+  "selectProducts": "પ્રોડક્ટ્સ પસંદ કરો",
+
+  "searchProducts": "પ્રોડક્ટ્સ શોધો...",
+
+  "noProductsFound": "કોઈ પ્રોડક્ટ મળ્યું નથી",
+
+  "addProduct": "પ્રોડક્ટ ઉમેરો",
+
+  "productName": "પ્રોડક્ટનું નામ",
+
+  "productPrice": "પ્રોડક્ટની કિંમત",
+
+  "productQuantity": "માત્રા",
+
+  "category": "શ્રેણી",
+
+  "cost": "ખર્ચ",
+
+  "unit": "એકમ",
+
+  "stockQuantity": "સ્ટોક માત્રા",
+
+  "minimumStock": "લઘુત્તમ સ્ટોક",
+
+  "description": "વર્ણન",
+
+  "save": "સેવ કરો",
+
+  "cancel": "રદ કરો",
+
+  "delete": "ડિલીટ કરો",
+
+  "edit": "સંપાદિત કરો",
+
+  "confirm": "પુષ્ટિ કરો",
+
+  "yes": "હા",
+
+  "no": "ના",
+
+  "ok": "ઓકે",
+
+  "back": "પાછળ",
+
+  "next": "આગળ",
+
+  "done": "થઈ ગયું",
+
+  "loading": "લોડ થઈ રહ્યું છે...",
+
+  "error": "ભૂલ",
+
+  "success": "સફળતા",
+
+  "warning": "ચેતવણી",
+
+  "info": "માહિતી",
+
+  "customerDetails": "ગ્રાહકની વિગતો",
+
+  "customerName": "ગ્રાહકનું નામ",
+
+  "customerPhone": "ગ્રાહકનો ફોન",
+
+  "customerEmail": "ગ્રાહકનો ઇમેઇલ",
+
+  "customerAddress": "ગ્રાહકનું સરનામું",
+
+  "invoicePreview": "ઇન્વોઇસ પ્રીવ્યૂ",
+
+  "invoiceNumber": "ઇન્વોઇસ નંબર",
+
+  "invoiceDate": "ઇન્વોઇસની તારીખ",
+
+  "dueDate": "મુકદર તારીખ",
+
+  "subtotal": "સબટોટલ",
+
+  "discount": "ડિસ્કાઉન્ટ",
+
+  "total": "કુલ",
+
+  "paymentMethod": "પેમેન્ટ પદ્ધતિ",
+
+  "cash": "રોકડ",
+
+  "card": "કાર્ડ",
+
+  "upi": "યુપીઆઇ",
+
+  "bank": "બેંક ટ્રાન્સફર",
+
+  "selectPaymentMethod": "પેમેન્ટ પદ્ધતિ પસંદ કરો",
+
+  "generateQrCode": "QR કોડ જનરેટ કરો",
+
+  "scanToPay": "પે કરવા માટે સ્કેન કરો",
+
+  "qrCodeForPayment": "પેમેન્ટ માટે QR કોડ",
+
+  "shareInvoice": "ઇન્વોઇસ શેર કરો",
+
+  "downloadInvoice": "ઇન્વોઇસ ડાઉનલોડ કરો",
+
+  "printInvoice": "ઇન્વોઇસ પ્રિન્ટ કરો",
+
+  "quantity": "માત્રા",
+
+  "price": "કિંમત",
+
+  "amount": "રકમ",
+
+  "enterQuantity": "માત્રા દાખલ કરો",
+
+  "invalidQuantity": "અમાન્ય માત્રા",
+
+  "outOfStock": "સ્ટોક સમાપ્ત",
+
+  "lowStock": "ઓછો સ્ટોક",
+
+  "inStock": "સ્ટોકમાં છે",
+
+  "availableStock": "ઉપલબ્ધ સ્ટોક: {count}",
+
+  "discountPercentage": "ડિસ્કાઉન્ટ (%)",
+
+  "discountAmount": "ડિસ્કાઉન્ટ રકમ",
+
+  "applyDiscount": "ડિસ્કાઉન્ટ લાગુ કરો",
+
+  "removeDiscount": "ડિસ્કાઉન્ટ હટાવો",
+
+  "selectCustomer": "ગ્રાહક પસંદ કરો",
+
+  "addNewCustomer": "નવો ગ્રાહક ઉમેરો",
+
+  "customerRequired": "ગ્રાહકની વિગતો જરૂરી છે",
+
+  "productsRequired": "કૃપા કરીને ઓછામાં ઓછું એક પ્રોડક્ટ ઉમેરો",
+
+  "invoiceCreated": "ઇન્વોઇસ સફળતાપૂર્વક બનાવ્યો",
+
+  "invoiceCreationFailed": "ઇન્વોઇસ બનાવવામાં નિષ્ફળ",
+
+  "login": "લોગિન",
+
+  "register": "રજિસ્ટર",
+
+  "forgotPassword": "પાસવર્ડ ભૂલી ગયા?",
+
+  "password": "પાસવર્ડ",
+
+  "confirmPassword": "પાસવર્ડની પુષ્ટિ કરો",
+
+  "firstName": "પ્રથમ નામ",
+
+  "lastName": "છેલ્લું નામ",
+
+  "mobileNumber": "મોબાઇલ નંબર",
+
+  "emailAddress": "ઇમેઇલ સરનામું",
+
+  "loginToAccount": "તમારા એકાઉન્ટમાં લોગિન કરો",
+
+  "createNewAccount": "નવું એકાઉન્ટ બનાવો",
+
+  "alreadyHaveAccount": "પહેલાથી એકાઉન્ટ છે?",
+
+  "dontHaveAccount": "એકાઉન્ટ નથી?",
+
+  "signInHere": "અહીં સાઇન ઇન કરો",
+
+  "signUpHere": "અહીં સાઇન અપ કરો",
+
+  "welcomeBack": "વેલકમ બેક!",
+
+  "getStarted": "શરૂ કરો",
+
+  "invalidEmail": "અમાન્ય ઇમેઇલ સરનામું",
+
+  "invalidPhone": "અમાન્ય ફોન નંબર",
+
+  "passwordTooShort": "પાસવર્ડ ઓછામાં ઓછો 8 અક્ષરોનો હોવો જોઈએ",
+
+  "passwordsDoNotMatch": "પાસવર્ડ મેળ ખાતા નથી",
+
+  "fieldRequired": "આ ફીલ્ડ જરૂરી છે",
+
+  "loginSuccessful": "લોગિન સફળ",
+
+  "registrationSuccessful": "રજિસ્ટ્રેશન સફળ",
+
+  "loginFailed": "લોગિન નિષ્ફળ",
+
+  "registrationFailed": "રજિસ્ટ્રેશન નિષ્ફળ",
+
+  "networkError": "નેટવર્ક એરર. કૃપા કરીને તમારું કનેક્શન તપાસો.",
+
+  "serverError": "સર્વર એરર. કૃપા કરીને પછીથી પ્રયાસ કરો.",
+
+  "unknownError": "અજાણી ભૂલ આવી",
+
+  "billTo": "બિલ આપવું:",
+
+  "items": "વસ્તુઓ:",
+
+  "product": "પ્રોડક્ટ",
+
+  "qty": "માત્રા",
+
+  "per": "પ્રતિ",
+
+  "totalAmount": "કુલ રકમ",
+
+  "paymentInformation": "પેમેન્ટ માહિતી:",
+
+  "paymentMethodLabel": "પેમેન્ટ પદ્ધતિ:",
+
+  "online": "ઓનલાઇન (યુપીઆઇ)",
+
+  "thankYouBusiness": "તમારા બિઝનેસ માટે આભાર!",
+
+  "generatedOn": "જનરેટ થયું",
+
+  "invoiceGenerated": "ઇન્વોઇસ જનરેટ થયું",
+
+  "fullScreen": "ફુલ સ્ક્રીન",
+
+  "exitFullScreen": "ફુલ સ્ક્રીનમાંથી બહાર નીકળો",
+
+  "send": "મોકલો",
+
+  "print": "પ્રિન્ટ",
+
+  "createNewInvoice": "નવું ઇન્વોઇસ બનાવો",
+
+  "reports": "રિપોર્ટ્સ",
+
+  "recalculateReports": "રિપોર્ટ્સ ફરીથી ગણતરી કરો",
+
+  "cleanupOldData": "જૂનો ડેટા સાફ કરો",
+
+  "retry": "ફરી પ્રયાસ કરો",
+
+  "monthly": "માસિક",
+
+  "yearly": "વાર્ષિક",
+
+  "currentMonth": "વર્તમાન મહિનો",
+
+  "currentYear": "વર્તમાન વર્ષ",
+
+  "revenue": "આવક",
+
+  "investment": "રોકાણ",
+
+  "profit": "નફો",
+
+  "selectYear": "વર્ષ પસંદ કરો",
+
+  "noDataAvailable": "કોઈ ડેટા ઉપલબ્ધ નથી",
+
+  "margin": "માર્જિન",
+
+  "recalculatingReports": "રિપોર્ટ્સની ફરીથી ગણતરી કરી રહ્યા છીએ...",
+
+  "dataCleanedUp": "જૂનો ડેટા સાફ કરવામાં આવ્યો છે",
+
+  "welcomeBack": "પાછા આવવા બદલ સ્વાગત,",
+
+  "readyToManage": "આજે તમારા બિઝનેસનું સંચાલન કરવા તૈયાર છો?",
+
+  "upgradeToAccess": "બધી સુવિધાઓ મેળવવા માટે અપગ્રેડ કરો",
+
+  "upgrade": "અપગ્રેડ",
+
+  "quickActions": "ઝડપી ક્રિયાઓ",
+
+  "newInvoice": "નવું ઇન્વોઇસ",
+
+  "viewProducts": "પ્રોડક્ટ્સ જુઓ",
+
+  "manageStock": "સ્ટોક મેનેજ કરો",
+
+  "overview": "ઝાંખી",
+
+  "totalRevenue": "માસિક આવક",
+
+  "tapToViewDetails": "વિગતો જોવા માટે ટેપ કરો"
 }

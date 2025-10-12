@@ -143,7 +143,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: SafeArea(
+        child: Column(
         children: [
           // Search Bar
           Padding(
@@ -394,6 +395,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             ),
           ),
         ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddProduct,

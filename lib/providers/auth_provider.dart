@@ -185,15 +185,27 @@ class AuthProvider extends ChangeNotifier {
       print('AuthProvider: Fetching current user data...');
       final response = await _authService.getCurrentUser();
       if (response.isSuccess && response.data != null) {
+        print('AuthProvider: Raw response data: ${response.data}');
+        
         _user = response.data;
         await _storageService.saveUser(_user!);
         
         print('AuthProvider: User data updated successfully');
-        print('  - Subscription: ${_user!.subscription != null ? 'exists' : 'null'}');
+        print('  - User ID: ${_user!.userId}');
+        print('  - Email: ${_user!.email}');
+        print('  - Subscription exists: ${_user!.subscription != null}');
+        
         if (_user!.subscription != null) {
           print('  - Plan: ${_user!.subscription!.planType}');
           print('  - Status: ${_user!.subscription!.status}');
+          print('  - Start Date: ${_user!.subscription!.startDate}');
+          print('  - End Date: ${_user!.subscription!.endDate}');
           print('  - Days remaining: ${_user!.subscription!.daysRemaining}');
+          print('  - Is Active: ${_user!.subscription!.isActive}');
+          print('  - Has Active Subscription: ${_user!.hasActiveSubscription}');
+          print('  - Is Subscription Expired: ${_user!.isSubscriptionExpired}');
+        } else {
+          print('  - No subscription data found');
         }
         
         notifyListeners();
@@ -202,6 +214,7 @@ class AuthProvider extends ChangeNotifier {
       }
     } catch (e) {
       print('AuthProvider: Error getting current user: $e');
+      print('AuthProvider: Stack trace: ${StackTrace.current}');
     }
   }
 
@@ -397,10 +410,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Wait for subscription to be active after payment
-  Future<bool> waitForActiveSubscription({int maxAttempts = 5, Duration delay = const Duration(seconds: 2)}) async {
+  Future<bool> waitForActiveSubscription({int maxAttempts = 8, Duration delay = const Duration(seconds: 2)}) async {
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
       print('AuthProvider: Checking subscription status (attempt $attempt/$maxAttempts)...');
       
+      // Force refresh user data from server
       await getCurrentUser();
       
       if (hasActiveSubscription && !isSubscriptionExpired) {
@@ -409,12 +423,22 @@ class AuthProvider extends ChangeNotifier {
       }
       
       if (attempt < maxAttempts) {
-        print('AuthProvider: No active subscription yet, waiting ${delay.inSeconds} seconds...');
-        await Future.delayed(delay);
+        // Use exponential backoff: start with 1s, then 2s, 3s, 4s, etc.
+        Duration currentDelay = Duration(seconds: attempt);
+        print('AuthProvider: No active subscription yet, waiting ${currentDelay.inSeconds} seconds...');
+        await Future.delayed(currentDelay);
       }
     }
     
     print('AuthProvider: Failed to detect active subscription after $maxAttempts attempts');
+    print('AuthProvider: Final subscription status:');
+    print('  - Has subscription: ${_user?.subscription != null}');
+    if (_user?.subscription != null) {
+      print('  - Plan: ${_user!.subscription!.planType}');
+      print('  - Status: ${_user!.subscription!.status}');
+      print('  - End date: ${_user!.subscription!.endDate}');
+      print('  - Days remaining: ${_user!.subscription!.daysRemaining}');
+    }
     return false;
   }
 

@@ -4,6 +4,7 @@ import '../../config/app_theme.dart';
 import '../../providers/invoice_provider.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../l10n/app_localizations.dart';
 import 'payment_method_screen.dart';
 
 class CustomerDetailsScreen extends StatefulWidget {
@@ -54,17 +55,20 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Customer Details',
+      appBar: CustomAppBar(
+        title: localizations.customerDetails,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSizes.md),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               // Info card
               Card(
                 color: AppColors.primaryLight.withOpacity(0.1),
@@ -82,7 +86,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Customer Information',
+                              localizations.customerDetails,
                               style: AppTextStyles.bodyMedium.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.primary,
@@ -107,7 +111,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
 
               // Customer name field
               Text(
-                'Customer Name *',
+                '${localizations.customerName} *',
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -115,15 +119,15 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
               const SizedBox(height: AppSizes.sm),
               CustomTextField(
                 controller: _nameController,
-                labelText: 'Customer Name',
-                hintText: 'Enter customer full name',
+                labelText: localizations.customerName,
+                hintText: 'Enter customer full name', // TODO: Add to localizations
                 prefixIcon: Icons.person,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Customer name is required';
+                    return localizations.fieldRequired;
                   }
                   if (value.trim().length < 2) {
-                    return 'Name must be at least 2 characters long';
+                    return 'Name must be at least 2 characters long'; // TODO: Add to localizations
                   }
                   return null;
                 },
@@ -133,7 +137,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
 
               // Mobile number field
               Text(
-                'Mobile Number *',
+                '${localizations.mobileNumber} *',
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -141,16 +145,16 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
               const SizedBox(height: AppSizes.sm),
               CustomTextField(
                 controller: _mobileController,
-                labelText: 'Mobile Number',
-                hintText: 'Enter 10-digit mobile number',
+                labelText: localizations.mobileNumber,
+                hintText: 'Enter 10-digit mobile number', // TODO: Add to localizations
                 prefixIcon: Icons.phone,
                 keyboardType: TextInputType.phone,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Mobile number is required';
+                    return localizations.fieldRequired;
                   }
                   if (!RegExp(r'^[6-9]\d{9}$').hasMatch(value.trim())) {
-                    return 'Please enter a valid 10-digit mobile number';
+                    return localizations.invalidPhone;
                   }
                   return null;
                 },
@@ -175,7 +179,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                               ),
                               const SizedBox(width: AppSizes.sm),
                               Text(
-                                'Invoice Summary',
+                                'Invoice Summary', // TODO: Add to localizations
                                 style: AppTextStyles.h6.copyWith(
                                   color: AppColors.primary,
                                 ),
@@ -188,7 +192,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Items (${invoiceProvider.selectedProducts.length})',
+                                'Items (${invoiceProvider.selectedProducts.length})', // TODO: Add to localizations  
                                 style: AppTextStyles.bodyMedium,
                               ),
                               Text(
@@ -247,8 +251,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
           ),
         ),
       ),
-      
-      bottomNavigationBar: Container(
+      ),
+      bottomNavigationBar: SafeArea(child: Container(
         padding: const EdgeInsets.all(AppSizes.md),
         decoration: BoxDecoration(
           color: AppColors.surface,
@@ -263,9 +267,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
             ),
-            child: const Text('Next - Payment Method'),
+            child: Text('${localizations.next} - ${localizations.paymentMethod}'),
           ),
         ),
+      ),
       ),
     );
   }

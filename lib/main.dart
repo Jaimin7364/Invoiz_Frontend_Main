@@ -11,6 +11,7 @@ import 'services/language_service.dart';
 import 'services/subscription_route_observer.dart';
 import 'providers/product_provider.dart';
 import 'providers/invoice_provider.dart';
+import 'providers/reports_provider.dart';
 import 'screens/splash_screen.dart';
 import 'l10n/app_localizations.dart';
 
@@ -41,6 +42,18 @@ class InvoizApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => InvoiceProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, ReportsProvider>(
+          create: (_) => ReportsProvider(),
+          update: (_, authProvider, reportsProvider) {
+            if (reportsProvider != null) {
+              reportsProvider.setAuthProvider(authProvider);
+              return reportsProvider;
+            }
+            final newReportsProvider = ReportsProvider();
+            newReportsProvider.setAuthProvider(authProvider);
+            return newReportsProvider;
+          },
+        ),
         ChangeNotifierProvider.value(value: languageService),
       ],
       child: Consumer<LanguageService>(

@@ -3,11 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import '../../config/app_theme.dart';
 import '../../models/invoice_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/invoice_provider.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../l10n/app_localizations.dart';
+import '../invoice/invoice_create_screen.dart';
 
 class InvoiceFinalScreen extends StatefulWidget {
   final Invoice invoice;
@@ -30,32 +37,461 @@ class _InvoiceFinalScreenState extends State<InvoiceFinalScreen> {
     });
   }
 
-  void _sendInvoice() {
-    // TODO: Implement send invoice functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Send invoice functionality will be implemented'),
-        backgroundColor: AppColors.success,
-      ),
-    );
+  void _sendInvoice() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final business = authProvider.user?.businessInfo;
+    
+    try {
+      // Create invoice message for WhatsApp
+      final invoiceMessage = _createInvoiceMessage(business);
+      
+      // Format customer mobile number for WhatsApp
+      String customerMobile = widget.invoice.customer.mobileNumber;
+      if (customerMobile.startsWith('0')) {
+        customerMobile = customerMobile.substring(1);
+      }
+      if (!customerMobile.startsWith('+91')) {
+        customerMobile = '+91$customerMobile';
+      }
+      
+      // Create WhatsApp URL
+      final whatsappUrl = 'https://wa.me/$customerMobile?text=${Uri.encodeComponent(invoiceMessage)}';
+      
+      // Try to launch WhatsApp
+      if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
+        await launchUrl(
+          Uri.parse(whatsappUrl),
+          mode: LaunchMode.externalApplication,
+        );
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Opening WhatsApp to send invoice...'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+      } else {
+        // Fallback to share
+        await Share.share(
+          invoiceMessage,
+          subject: 'Invoice ${widget.invoice.invoiceNumber}',
+        );
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('WhatsApp not available. Using system share...'),
+              backgroundColor: AppColors.info,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to send invoice: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
-  void _printInvoice() {
-    // TODO: Implement print invoice functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Print invoice functionality will be implemented'),
-        backgroundColor: AppColors.success,
+  String _createInvoiceMessage(businessInfo) {
+    final businessName = businessInfo?.businessName ?? 'Business';
+    final customerName = widget.invoice.customer.name;
+    final invoiceNumber = widget.invoice.invoiceNumber;
+    final totalAmount = widget.invoice.totalAmount;
+    final invoiceDate = DateFormat('dd/MM/yyyy').format(widget.invoice.invoiceDate);
+    
+    final itemsList = widget.invoice.items.map((item) => 
+      '• ${item.productName} x${item.quantity} = ₹${item.total.toStringAsFixed(2)}'
+    ).join('\n');
+    
+    return '''🧾 *INVOICE* 🧾
+
+Dear $customerName,
+
+Thank you for your purchase from *$businessName*!
+
+📋 *Invoice Details:*
+Invoice No: $invoiceNumber
+Date: $invoiceDate
+
+🛒 *Items:*
+$itemsList
+
+💰 *Total Amount: ₹${totalAmount.toStringAsFixed(2)}*
+
+${widget.invoice.discountAmount > 0 ? '🎯 Discount Applied: ₹${widget.invoice.discountAmount.toStringAsFixed(2)}\n' : ''}
+
+Payment Method: ${widget.invoice.paymentMethod == PaymentMethod.cash ? '💵 Cash' : '💳 Online Payment'}
+
+Thank you for choosing us! 🙏
+
+Best regards,
+$businessName''';
+  }
+
+  void _printInvoice() async {
+    try {
+      // Generate PDF for printing
+      final pdfBytes = await _generateInvoicePDF();
+      
+      // Print the PDF
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+        name: 'Invoice_${widget.invoice.invoiceNumber}',
+        format: PdfPageFormat.roll80, // Thermal printer format (80mm width)
+      );
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invoice sent to printer successfully'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to print invoice: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<Uint8List> _generateInvoicePDF() async {
+    final pdf = pw.Document();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final business = authProvider.user?.businessInfo;
+    
+    // Load fonts for Gujarati support
+    pw.Font? gujaratiFont;
+    pw.Font? gujaratiFontBold;
+    
+    try {
+      final gujaratiRegularBytes = await rootBundle.load('assets/fonts/NotoSansGujarati-Regular.ttf');
+      gujaratiFont = pw.Font.ttf(gujaratiRegularBytes);
+      
+      final gujaratiBoldBytes = await rootBundle.load('assets/fonts/NotoSansGujarati-Bold.ttf');
+      gujaratiFontBold = pw.Font.ttf(gujaratiBoldBytes);
+    } catch (e) {
+      print('Error loading Gujarati fonts: $e');
+      // Continue with default fonts if Gujarati fonts fail to load
+    }
+    
+    // Helper function to create text style with Gujarati font support
+    pw.TextStyle createTextStyle({
+      double fontSize = 10,
+      bool isBold = false,
+      String? text,
+    }) {
+      // Check if text contains Gujarati characters
+      bool hasGujarati = text != null && RegExp(r'[\u0A80-\u0AFF]').hasMatch(text);
+      
+      if (hasGujarati && gujaratiFont != null) {
+        return pw.TextStyle(
+          font: isBold && gujaratiFontBold != null ? gujaratiFontBold : gujaratiFont,
+          fontSize: fontSize,
+          fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+        );
+      } else {
+        return pw.TextStyle(
+          fontSize: fontSize,
+          fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+        );
+      }
+    }
+    
+    // Helper function to create mixed content with proper font handling
+    List<pw.InlineSpan> createMixedText(String text, {double fontSize = 10, bool isBold = false}) {
+      List<pw.InlineSpan> spans = [];
+      
+      // Replace rupee symbol with Rs. for better PDF compatibility
+      text = text.replaceAll('₹', 'Rs.');
+      
+      // Split text into Gujarati and non-Gujarati parts
+      final gujaratiRegex = RegExp(r'[\u0A80-\u0AFF]+');
+      int lastEnd = 0;
+      
+      for (final match in gujaratiRegex.allMatches(text)) {
+        // Add non-Gujarati text before this match
+        if (match.start > lastEnd) {
+          String nonGujarati = text.substring(lastEnd, match.start);
+          if (nonGujarati.isNotEmpty) {
+            spans.add(pw.TextSpan(
+              text: nonGujarati,
+              style: pw.TextStyle(
+                fontSize: fontSize,
+                fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              ),
+            ));
+          }
+        }
+        
+        // Add Gujarati text with Gujarati font
+        String gujaratiText = text.substring(match.start, match.end);
+        spans.add(pw.TextSpan(
+          text: gujaratiText,
+          style: pw.TextStyle(
+            font: isBold && gujaratiFontBold != null ? gujaratiFontBold : gujaratiFont,
+            fontSize: fontSize,
+            fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+          ),
+        ));
+        
+        lastEnd = match.end;
+      }
+      
+      // Add remaining non-Gujarati text
+      if (lastEnd < text.length) {
+        String remaining = text.substring(lastEnd);
+        if (remaining.isNotEmpty) {
+          spans.add(pw.TextSpan(
+            text: remaining,
+            style: pw.TextStyle(
+              fontSize: fontSize,
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+            ),
+          ));
+        }
+      }
+      
+      // If no Gujarati text found, return single span with default font
+      if (spans.isEmpty) {
+        spans.add(pw.TextSpan(
+          text: text,
+          style: pw.TextStyle(
+            fontSize: fontSize,
+            fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+          ),
+        ));
+      }
+      
+      return spans;
+    }
+    
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.roll80,
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Business Header
+              pw.Center(
+                child: pw.Column(
+                  children: [
+                    pw.RichText(
+                      text: pw.TextSpan(
+                        children: createMixedText(business?.businessName ?? 'Business Name', fontSize: 16, isBold: true),
+                      ),
+                      textAlign: pw.TextAlign.center,
+                    ),
+                    if (business?.businessAddress != null) ...[
+                      pw.SizedBox(height: 4),
+                      pw.RichText(
+                        text: pw.TextSpan(
+                          children: createMixedText(business!.businessAddress.fullAddress, fontSize: 10),
+                        ),
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    ],
+                    if (business?.contactDetails?.phone != null) ...[
+                      pw.SizedBox(height: 2),
+                      pw.Text(
+                        'Phone: ${business!.contactDetails!.phone}',
+                        style: createTextStyle(fontSize: 10),
+                      ),
+                    ],
+                    if (business?.gstNumber != null) ...[
+                      pw.SizedBox(height: 2),
+                      pw.Text(
+                        'GST: ${business!.gstNumber ?? 'N/A'}',
+                        style: createTextStyle(fontSize: 10),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              
+              pw.SizedBox(height: 16),
+              pw.Divider(),
+              
+              // Invoice Details
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(
+                    'Invoice: ${widget.invoice.invoiceNumber}',
+                    style: createTextStyle(),
+                  ),
+                  pw.Text(
+                    'Date: ${DateFormat('dd/MM/yyyy').format(widget.invoice.invoiceDate)}',
+                    style: createTextStyle(),
+                  ),
+                ],
+              ),
+              
+              pw.SizedBox(height: 8),
+              
+              // Customer Details
+              pw.Text(
+                'Bill To:', 
+                style: createTextStyle(isBold: true)
+              ),
+              pw.RichText(
+                text: pw.TextSpan(
+                  children: createMixedText(widget.invoice.customer.name),
+                ),
+              ),
+              pw.Text(
+                'Mobile: ${widget.invoice.customer.mobileNumber}',
+                style: createTextStyle(),
+              ),
+              
+              pw.SizedBox(height: 12),
+              pw.Divider(),
+              
+              // Items
+              pw.Text(
+                'Items:', 
+                style: createTextStyle(isBold: true)
+              ),
+              pw.SizedBox(height: 4),
+              
+              ...widget.invoice.items.map((item) => pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(vertical: 2),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Expanded(
+                      flex: 2,
+                      child: pw.RichText(
+                        text: pw.TextSpan(
+                          children: createMixedText('${item.productName} x${item.quantity}'),
+                        ),
+                      ),
+                    ),
+                    pw.RichText(
+                      text: pw.TextSpan(
+                        children: createMixedText('₹${item.total.toStringAsFixed(2)}'),
+                      ),
+                    ),
+                  ],
+                ),
+              )).toList(),
+              
+              pw.SizedBox(height: 8),
+              pw.Divider(),
+              
+              // Totals
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(
+                    'Subtotal:',
+                    style: createTextStyle(),
+                  ),
+                  pw.RichText(
+                    text: pw.TextSpan(
+                      children: createMixedText('₹${widget.invoice.subtotal.toStringAsFixed(2)}'),
+                    ),
+                  ),
+                ],
+              ),
+              
+              if (widget.invoice.discountAmount > 0) ...[
+                pw.SizedBox(height: 2),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(
+                      'Discount:',
+                      style: createTextStyle(),
+                    ),
+                    pw.RichText(
+                      text: pw.TextSpan(
+                        children: createMixedText('-₹${widget.invoice.discountAmount.toStringAsFixed(2)}'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              
+              pw.SizedBox(height: 4),
+              pw.Divider(thickness: 2),
+              
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(
+                    'Total:',
+                    style: createTextStyle(isBold: true),
+                  ),
+                  pw.RichText(
+                    text: pw.TextSpan(
+                      children: createMixedText('₹${widget.invoice.totalAmount.toStringAsFixed(2)}', isBold: true),
+                    ),
+                  ),
+                ],
+              ),
+              
+              pw.SizedBox(height: 12),
+              pw.Divider(),
+              
+              // Payment Method
+              pw.Text(
+                'Payment: ${widget.invoice.paymentMethod == PaymentMethod.cash ? 'Cash' : 'Online'}',
+                style: createTextStyle(),
+              ),
+              
+              pw.SizedBox(height: 16),
+              
+              // Footer
+              pw.Center(
+                child: pw.Column(
+                  children: [
+                    pw.Text(
+                      'Thank you for your business!',
+                      style: createTextStyle(isBold: true),
+                    ),
+                    pw.SizedBox(height: 4),
+                    pw.Text(
+                      'Generated: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                      style: createTextStyle(fontSize: 8),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
+    
+    return pdf.save();
   }
 
   void _createNewInvoice() {
     final invoiceProvider = Provider.of<InvoiceProvider>(context, listen: false);
     invoiceProvider.resetInvoiceCreation();
     
-    // Navigate back to the beginning
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    // Navigate to invoice create screen
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) => const InvoiceCreateScreen(),
+      ),
+      (route) => route.isFirst,
+    );
   }
 
   String _generateUpiLink(String upiId, double amount, String invoiceNumber) {
@@ -64,18 +500,21 @@ class _InvoiceFinalScreenState extends State<InvoiceFinalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Invoice Generated',
+        title: localizations.invoiceGenerated,
         actions: [
           IconButton(
             onPressed: _togglePreviewMode,
             icon: Icon(_isPreviewMode ? Icons.fullscreen : Icons.fullscreen_exit),
-            tooltip: _isPreviewMode ? 'Full Screen' : 'Exit Full Screen',
+            tooltip: _isPreviewMode ? localizations.fullScreen : localizations.exitFullScreen,
           ),
         ],
       ),
-      body: Column(
+      body: SafeArea(
+        child: Column(
         children: [
           if (!_isPreviewMode) ...[
             // Action buttons
@@ -87,7 +526,7 @@ class _InvoiceFinalScreenState extends State<InvoiceFinalScreen> {
                     child: OutlinedButton.icon(
                       onPressed: _sendInvoice,
                       icon: const Icon(Icons.send),
-                      label: const Text('SEND'),
+                      label: Text(localizations.send),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
                       ),
@@ -98,7 +537,7 @@ class _InvoiceFinalScreenState extends State<InvoiceFinalScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _printInvoice,
                       icon: const Icon(Icons.print),
-                      label: const Text('PRINT'),
+                      label: Text(localizations.print),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
                       ),
@@ -128,27 +567,27 @@ class _InvoiceFinalScreenState extends State<InvoiceFinalScreen> {
                       const SizedBox(height: AppSizes.xl),
                       
                       // Customer details
-                      _buildCustomerSection(),
+                      _buildCustomerSection(context),
                       
                       const SizedBox(height: AppSizes.xl),
                       
                       // Items table
-                      _buildItemsTable(),
+                      _buildItemsTable(context),
                       
                       const SizedBox(height: AppSizes.xl),
                       
                       // Totals
-                      _buildTotalsSection(),
+                      _buildTotalsSection(context),
                       
                       const SizedBox(height: AppSizes.xl),
                       
                       // Payment method and QR code
-                      _buildPaymentSection(),
+                      _buildPaymentSection(context),
                       
                       const SizedBox(height: AppSizes.xl),
                       
                       // Footer
-                      _buildInvoiceFooter(),
+                      _buildInvoiceFooter(context),
                     ],
                   ),
                 ),
@@ -168,12 +607,13 @@ class _InvoiceFinalScreenState extends State<InvoiceFinalScreen> {
                     backgroundColor: AppColors.secondary,
                     padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
                   ),
-                  child: const Text('Create New Invoice'),
+                  child: Text(localizations.createNewInvoice),
                 ),
               ),
             ),
           ],
         ],
+        ),
       ),
     );
   }
@@ -268,12 +708,14 @@ class _InvoiceFinalScreenState extends State<InvoiceFinalScreen> {
     );
   }
 
-  Widget _buildCustomerSection() {
+  Widget _buildCustomerSection(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Bill To:',
+          localizations.billTo,
           style: AppTextStyles.h6.copyWith(
             color: AppColors.primary,
           ),
@@ -309,12 +751,14 @@ class _InvoiceFinalScreenState extends State<InvoiceFinalScreen> {
     );
   }
 
-  Widget _buildItemsTable() {
+  Widget _buildItemsTable(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Items:',
+          localizations.items,
           style: AppTextStyles.h6.copyWith(
             color: AppColors.primary,
           ),
@@ -447,7 +891,7 @@ class _InvoiceFinalScreenState extends State<InvoiceFinalScreen> {
     );
   }
 
-  Widget _buildTotalsSection() {
+  Widget _buildTotalsSection(BuildContext context) {
     return Column(
       children: [
         const Divider(),
@@ -504,7 +948,7 @@ class _InvoiceFinalScreenState extends State<InvoiceFinalScreen> {
     );
   }
 
-  Widget _buildPaymentSection() {
+  Widget _buildPaymentSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -643,7 +1087,7 @@ class _InvoiceFinalScreenState extends State<InvoiceFinalScreen> {
     );
   }
 
-  Widget _buildInvoiceFooter() {
+  Widget _buildInvoiceFooter(BuildContext context) {
     return Column(
       children: [
         const Divider(),

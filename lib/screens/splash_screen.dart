@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../config/app_theme.dart';
 import '../providers/auth_provider.dart';
 import '../services/subscription_guard_service.dart';
+import '../services/providers_coordinator.dart';
 import 'auth/welcome_screen.dart';
 import 'home/home_screen.dart';
 
@@ -56,6 +57,13 @@ class _SplashScreenState extends State<SplashScreen>
     
     // Initialize auth provider
     await authProvider.initialize();
+    
+    // Set up provider callbacks after initialization
+    try {
+      ProvidersCoordinator.setupProviderCallbacks(context);
+    } catch (e) {
+      print('Error setting up provider callbacks: $e');
+    }
     
     // Wait for animations to complete
     await Future.delayed(const Duration(milliseconds: 2500));

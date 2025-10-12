@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/reports_provider.dart';
+import '../../providers/product_provider.dart';
 import '../../services/subscription_guard_service.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../l10n/app_localizations.dart';
 import '../subscription/subscription_status_screen.dart';
 import 'profile_screen.dart';
 import '../products/products_screen.dart';
 import '../invoice/invoice_create_screen.dart';
+import '../reports/reports_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -69,57 +73,88 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textSecondary,
-        backgroundColor: AppColors.surface,
-        elevation: 8,
-        items: const [
+      body: SafeArea(
+        child: _screens[_selectedIndex],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          selectedItemColor: AppColors.primary,
+          unselectedItemColor: AppColors.textSecondary,
+          backgroundColor: AppColors.surface,
+          elevation: 8,
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            activeIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+            icon: const Icon(Icons.dashboard_outlined),
+            activeIcon: const Icon(Icons.dashboard),
+            label: localizations.dashboard,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.inventory_2_outlined),
-            activeIcon: Icon(Icons.inventory_2),
-            label: 'Products',
+            icon: const Icon(Icons.inventory_2_outlined),
+            activeIcon: const Icon(Icons.inventory_2),
+            label: localizations.products,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.analytics_outlined),
-            activeIcon: Icon(Icons.analytics),
-            label: 'Reports',
+            icon: const Icon(Icons.analytics_outlined),
+            activeIcon: const Icon(Icons.analytics),
+            label: localizations.reports,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person),
+            label: localizations.profile,
           ),
         ],
+        ),
       ),
     );
   }
 }
 
 // Dashboard Tab
-class DashboardTab extends StatelessWidget {
+class DashboardTab extends StatefulWidget {
   const DashboardTab({super.key});
 
   @override
+  State<DashboardTab> createState() => _DashboardTabState();
+}
+
+class _DashboardTabState extends State<DashboardTab> {
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  void _loadData() {
+    // Load reports data for revenue
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<ReportsProvider>(context, listen: false).loadReports();
+        Provider.of<ProductProvider>(context, listen: false).getProducts(page: 1, limit: 1000); // Get all products for count
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Dashboard',
+      appBar: CustomAppBar(
+        title: localizations.dashboard,
         showBackButton: false,
       ),
-      body: Consumer<AuthProvider>(
-        builder: (context, authProvider, child) {
+      body: Consumer3<AuthProvider, ReportsProvider, ProductProvider>(
+        builder: (context, authProvider, reportsProvider, productProvider, child) {
           final user = authProvider.user;
+          final currentMonthReport = reportsProvider.currentMonthReport;
+          final totalProducts = productProvider.products.length;
           
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppSizes.md),
@@ -138,7 +173,7 @@ class DashboardTab extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Welcome back,',
+                        localizations.welcomeBack,
                         style: AppTextStyles.bodyLarge.copyWith(
                           color: AppColors.textOnPrimary.withOpacity(0.8),
                         ),
@@ -151,7 +186,7 @@ class DashboardTab extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSizes.sm),
                       Text(
-                        'Ready to manage your business today?',
+                        localizations.readyToManage,
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: AppColors.textOnPrimary.withOpacity(0.9),
                         ),
@@ -187,7 +222,7 @@ class DashboardTab extends StatelessWidget {
                                 style: AppTextStyles.h6,
                               ),
                               Text(
-                                'Upgrade to access all features',
+                                localizations.upgradeToAccess,
                                 style: AppTextStyles.bodySmall.copyWith(
                                   color: AppColors.textSecondary,
                                 ),
@@ -204,7 +239,7 @@ class DashboardTab extends StatelessWidget {
                               ),
                             );
                           },
-                          child: const Text('Upgrade'),
+                          child: Text(localizations.upgrade),
                         ),
                       ],
                     ),
@@ -214,8 +249,8 @@ class DashboardTab extends StatelessWidget {
                   const SizedBox(height: AppSizes.lg),
 
                 // Quick Actions
-                const Text(
-                  'Quick Actions',
+                Text(
+                  localizations.quickActions,
                   style: AppTextStyles.h5,
                 ),
                 const SizedBox(height: AppSizes.md),
@@ -227,8 +262,8 @@ class DashboardTab extends StatelessWidget {
                           child: _buildQuickActionCard(
                             context,
                             icon: Icons.receipt_long,
-                            title: 'Create Invoice',
-                            subtitle: 'New invoice',
+                            title: localizations.createInvoice,
+                            subtitle: localizations.newInvoice,
                             color: AppColors.primary,
                             onTap: () {
                               Navigator.push(
@@ -244,41 +279,9 @@ class DashboardTab extends StatelessWidget {
                         Expanded(
                           child: _buildQuickActionCard(
                             context,
-                            icon: Icons.add_box,
-                            title: 'Add Product',
-                            subtitle: 'New product',
-                            color: AppColors.secondary,
-                            onTap: () {
-                              // TODO: Navigate to create product
-                              _showComingSoon(context);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSizes.md),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildQuickActionCard(
-                            context,
-                            icon: Icons.person_add,
-                            title: 'Add Customer',
-                            subtitle: 'New customer',
-                            color: AppColors.warning,
-                            onTap: () {
-                              // TODO: Navigate to add customer
-                              _showComingSoon(context);
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: AppSizes.md),
-                        Expanded(
-                          child: _buildQuickActionCard(
-                            context,
                             icon: Icons.inventory_2,
-                            title: 'View Products',
-                            subtitle: 'Manage stock',
+                            title: localizations.viewProducts,
+                            subtitle: localizations.manageStock,
                             color: AppColors.success,
                             onTap: () {
                               // Navigate to products tab
@@ -299,41 +302,52 @@ class DashboardTab extends StatelessWidget {
                 const SizedBox(height: AppSizes.lg),
 
                 // Summary Cards
-                const Text(
-                  'Overview',
+                Text(
+                  localizations.overview,
                   style: AppTextStyles.h5,
                 ),
                 const SizedBox(height: AppSizes.md),
                 Row(
                   children: [
                     Expanded(
-                      child: _buildSummaryCard(
-                        title: 'Total Revenue',
-                        value: '₹0',
-                        icon: Icons.currency_rupee,
-                        color: AppColors.success,
+                      child: GestureDetector(
+                        onTap: () {
+                          // Navigate to Reports screen when revenue card is tapped
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ReportsScreen(),
+                            ),
+                          );
+                        },
+                        child: _buildSummaryCard(
+                          context,
+                          title: localizations.totalRevenue,
+                          value: '₹${currentMonthReport?.totalRevenue.toStringAsFixed(0) ?? '0'}',
+                          icon: Icons.currency_rupee,
+                          color: AppColors.success,
+                        ),
                       ),
                     ),
                     const SizedBox(width: AppSizes.md),
                     Expanded(
-                      child: _buildSummaryCard(
-                        title: 'Products',
-                        value: '0',
-                        icon: Icons.inventory_2,
-                        color: AppColors.secondary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildSummaryCard(
-                        title: 'Pending Orders',
-                        value: '0',
-                        icon: Icons.pending,
-                        color: AppColors.warning,
+                      child: GestureDetector(
+                        onTap: () {
+                          // Navigate to Products screen when products card is tapped
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ProductsScreen(),
+                            ),
+                          );
+                        },
+                        child: _buildSummaryCard(
+                          context,
+                          title: localizations.products,
+                          value: totalProducts.toString(),
+                          icon: Icons.inventory_2,
+                          color: AppColors.secondary,
+                        ),
                       ),
                     ),
                   ],
@@ -389,12 +403,15 @@ class DashboardTab extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCard({
+  Widget _buildSummaryCard(
+    BuildContext context, {
     required String title,
     required String value,
     required IconData icon,
     required Color color,
   }) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Container(
       padding: const EdgeInsets.all(AppSizes.md),
       decoration: BoxDecoration(
@@ -407,6 +424,10 @@ class DashboardTab extends StatelessWidget {
             offset: const Offset(0, 2),
           ),
         ],
+        border: Border.all(
+          color: color.withOpacity(0.2),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -414,34 +435,46 @@ class DashboardTab extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
+              Expanded(
+                child: Text(
+                  title,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-              Icon(
-                icon,
-                size: AppSizes.iconSm,
-                color: color,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  size: AppSizes.iconSm,
+                  color: color,
+                ),
               ),
             ],
           ),
           const SizedBox(height: AppSizes.sm),
           Text(
             value,
-            style: AppTextStyles.h4.copyWith(color: color),
+            style: AppTextStyles.h4.copyWith(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: AppSizes.xs),
+          Text(
+            localizations.tapToViewDetails,
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textSecondary.withOpacity(0.7),
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Feature coming soon!'),
-        backgroundColor: AppColors.info,
       ),
     );
   }
@@ -464,19 +497,7 @@ class ReportsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: CustomAppBar(
-        title: 'Reports',
-        showBackButton: false,
-      ),
-      body: Center(
-        child: Text(
-          'Reports Screen\nComing Soon!',
-          style: AppTextStyles.h4,
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
+    return const ReportsScreen();
   }
 }
 

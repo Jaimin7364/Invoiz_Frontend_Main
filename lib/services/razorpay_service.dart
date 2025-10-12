@@ -77,7 +77,7 @@ class RazorpayService {
       // Very basic options for testing
       var options = {
         'key': _razorpayLiveKey,
-        'amount': 100, // ₹1 in paise
+        'amount': 100, // ₹1 in paise (test amount)
         'name': 'Test Payment',
         'description': 'Testing Razorpay integration',
         'prefill': {
@@ -137,13 +137,90 @@ class RazorpayService {
     required String planType,
   }) async {
     try {
+      if (kDebugMode) {
+        print('🔍 RazorpayService: Starting payment verification...');
+        print('  - Order ID: $orderId');
+        print('  - Payment ID: $paymentId');
+        print('  - Signature: $signature');
+        print('  - Plan Type: $planType');
+      }
+
+      // Use the enhanced verification endpoint
       final response = await _apiService!.post(
-        '/subscription/verify-payment',
+        '/subscription/verify-payment-v2',
         data: {
           'razorpay_order_id': orderId,
           'razorpay_payment_id': paymentId,
           'razorpay_signature': signature,
           'plan_type': planType,
+        },
+      );
+
+      if (kDebugMode) {
+        print('✅ RazorpayService: Payment verification successful');
+        print('  - Response: ${response.data}');
+      }
+
+      return ApiResponse.success(response.data['data']);
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('❌ RazorpayService: Payment verification failed');
+        print('  - Status Code: ${e.response?.statusCode}');
+        print('  - Response Data: ${e.response?.data}');
+        print('  - Error Message: ${e.message}');
+      }
+      throw ApiException.fromDioError(e);
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ RazorpayService: Unexpected error during verification');
+        print('  - Error: $e');
+      }
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> verifyPaymentByOrder({
+    required String orderId,
+    String? planType,
+  }) async {
+    try {
+      if (kDebugMode) {
+        print('🔍 RazorpayService: verify by order...');
+        print('  - Order ID: $orderId');
+        print('  - Plan Type: $planType');
+      }
+
+      final response = await _apiService!.post(
+        '/subscription/verify-by-order',
+        data: {
+          'razorpay_order_id': orderId,
+          if (planType != null) 'plan_type': planType,
+        },
+      );
+
+      if (kDebugMode) {
+        print('✅ verify-by-order successful: ${response.data}');
+      }
+
+      return ApiResponse.success(response.data['data']);
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('❌ verify-by-order failed: ${e.response?.data}');
+      }
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> checkPaymentStatus({
+    String? transactionId,
+    String? razorpayOrderId,
+  }) async {
+    try {
+      final response = await _apiService!.post(
+        '/subscription/check-payment-status',
+        data: {
+          if (transactionId != null) 'transaction_id': transactionId,
+          if (razorpayOrderId != null) 'razorpay_order_id': razorpayOrderId,
         },
       );
 
@@ -176,6 +253,7 @@ class RazorpayService {
     required String userPhone,
     required String userName,
     required String description,
+    String? keyId,
     Function(PaymentSuccessResponse)? onSuccess,
     Function(PaymentFailureResponse)? onError,
     Function(ExternalWalletResponse)? onExternalWallet,
@@ -216,7 +294,8 @@ class RazorpayService {
     } else {
       // Use mobile implementation
       var options = {
-        'key': _razorpayLiveKey,
+        // Prefer server-provided key if available; fallback to default
+        'key': keyId ?? _razorpayLiveKey,
         'amount': (amount * 100).toInt(), // Amount in paise
         'name': 'Invoiz',
         'description': description,

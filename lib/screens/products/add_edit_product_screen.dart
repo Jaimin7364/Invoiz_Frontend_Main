@@ -215,7 +215,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+      child: Scaffold(
       appBar: CustomAppBar(
         title: widget.product != null ? 'Edit Product' : 'Add Product',
         showBackButton: true,
@@ -592,6 +593,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 

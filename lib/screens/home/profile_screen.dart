@@ -5,9 +5,8 @@ import '../../providers/auth_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/invoice_provider.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../widgets/language_selector.dart';
 import '../../models/user_model.dart';
-import '../../services/language_service.dart';
-import '../../widgets/language_selection_dialog.dart';
 import '../../l10n/app_localizations.dart';
 import '../auth/welcome_screen.dart';
 import '../business/business_details_screen.dart';
@@ -143,25 +142,7 @@ class ProfileScreen extends StatelessWidget {
                     _showComingSoon(context);
                   },
                 ),
-                Consumer<LanguageService>(
-                  builder: (context, languageService, child) {
-                    final localizations = AppLocalizations.of(context)!;
-                    final currentLanguage = languageService.supportedLanguages
-                        .firstWhere((lang) => lang['code'] == languageService.currentLocale.languageCode);
-                    
-                    return _buildProfileOption(
-                      icon: Icons.language_outlined,
-                      title: localizations.language,
-                      subtitle: currentLanguage['nativeName']!,
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => const LanguageSelectionDialog(),
-                        );
-                      },
-                    );
-                  },
-                ),
+                const LanguageSelector(),
                 _buildProfileOption(
                   icon: Icons.help_outline,
                   title: 'Help & Support',

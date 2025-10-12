@@ -5,6 +5,7 @@ import '../../models/product_model.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/invoice_provider.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../l10n/app_localizations.dart';
 import 'invoice_preview_screen.dart';
 
 class InvoiceCreateScreen extends StatefulWidget {
@@ -54,18 +55,19 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
   }
 
   void _showQuantityDialog(Product product) {
+    final localizations = AppLocalizations.of(context)!;
     final TextEditingController quantityController = TextEditingController(text: '1');
     
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Add ${product.name}'),
+        title: Text('${localizations.addProduct} ${product.name}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Price: ₹${product.price.toStringAsFixed(2)}',
+              '${localizations.price}: ₹${product.price.toStringAsFixed(2)}',
               style: AppTextStyles.bodyLarge.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,
@@ -75,8 +77,8 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
             TextField(
               controller: quantityController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Quantity',
+              decoration: InputDecoration(
+                labelText: localizations.quantity,
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.numbers),
               ),
@@ -87,7 +89,7 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(localizations.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -104,7 +106,7 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
                 );
               }
             },
-            child: const Text('Add'),
+            child: Text(localizations.addProduct),
           ),
         ],
       ),
@@ -122,14 +124,16 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Create Invoice',
+        title: localizations.createInvoice,
         actions: [
           IconButton(
             onPressed: _refreshProducts,
             icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh Products',
+            tooltip: 'Refresh Products', // TODO: Add to localizations
           ),
           Consumer<InvoiceProvider>(
             builder: (context, invoiceProvider, child) {
@@ -137,7 +141,7 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
                 return IconButton(
                   onPressed: _navigateToPreview,
                   icon: const Icon(Icons.preview),
-                  tooltip: 'Preview Invoice',
+                  tooltip: localizations.invoicePreview,
                 );
               }
               return const SizedBox();
@@ -145,7 +149,8 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: SafeArea(
+        child: Column(
         children: [
           // Selected products summary
           Consumer<InvoiceProvider>(
@@ -174,7 +179,7 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
                         ),
                         const SizedBox(width: AppSizes.sm),
                         Text(
-                          'Selected Products (${invoiceProvider.selectedProducts.length})',
+                          '${localizations.selectProducts} (${invoiceProvider.selectedProducts.length})',
                           style: AppTextStyles.bodyMedium.copyWith(
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary,
@@ -182,7 +187,7 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
                         ),
                         const Spacer(),
                         Text(
-                          'Total: ₹${invoiceProvider.subtotal.toStringAsFixed(2)}',
+                          '${localizations.total}: ₹${invoiceProvider.subtotal.toStringAsFixed(2)}',
                           style: AppTextStyles.bodyMedium.copyWith(
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary,
@@ -248,7 +253,7 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search products...',
+                    hintText: localizations.searchProducts,
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppSizes.radiusMd),
@@ -286,8 +291,8 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
                         padding: const EdgeInsets.only(top: AppSizes.sm),
                         child: Text(
                           _searchController.text.isNotEmpty
-                              ? 'Showing $filteredCount of ${productProvider.products.length} products'
-                              : '${productProvider.products.length} products in your account',
+                              ? 'Showing $filteredCount of ${productProvider.products.length} ${localizations.products.toLowerCase()}'
+                              : '${productProvider.products.length} ${localizations.products.toLowerCase()} in your account',
                           style: AppTextStyles.caption.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -409,7 +414,7 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
                         ),
                         const SizedBox(height: AppSizes.md),
                         Text(
-                          'No products found',
+                          localizations.noProductsFound,
                           style: AppTextStyles.h6.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -448,6 +453,7 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
             ),
           ),
         ],
+        ),
       ),
       floatingActionButton: Consumer<InvoiceProvider>(
         builder: (context, invoiceProvider, child) {

@@ -47,6 +47,13 @@ dependencies:
   # Image & Media
   image_picker: ^1.0.7
   cached_network_image: ^3.3.1
+  
+  # Sharing & Communication
+  share_plus: ^7.2.1
+  
+  # Printing
+  printing: ^5.11.1
+  pdf: ^3.10.7
 
   # QR Code Generation
   qr_flutter: ^4.1.0
@@ -69,6 +76,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -89,3 +97,24 @@ flutter:
           weight: 600
         - asset: assets/fonts/Poppins-Bold.ttf
           weight: 700
+    - family: NotoSansGujarati
+      fonts:
+        - asset: assets/fonts/NotoSansGujarati-Regular.ttf
+        - asset: assets/fonts/NotoSansGujarati-Bold.ttf
+          weight: 700
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/Logo.png"
+  remove_alpha_ios: true
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/images/Logo.png"
+  windows:
+    generate: true
+    image_path: "assets/images/Logo.png"
+  macos:
+    generate: true
+    image_path: "assets/images/Logo.png"

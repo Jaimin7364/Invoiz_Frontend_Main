@@ -250,5 +250,751 @@
   "pending": "Pending",
   "@pending": {
     "description": "Pending status"
+  },
+
+  "products": "Products",
+  "@products": {
+    "description": "Products tab label"
+  },
+
+  "invoices": "Invoices",
+  "@invoices": {
+    "description": "Invoices tab label"
+  },
+
+  "createInvoice": "Create Invoice",
+  "@createInvoice": {
+    "description": "Create invoice button"
+  },
+
+  "selectProducts": "Select Products",
+  "@selectProducts": {
+    "description": "Select products title"
+  },
+
+  "searchProducts": "Search products...",
+  "@searchProducts": {
+    "description": "Search products placeholder"
+  },
+
+  "noProductsFound": "No products found",
+  "@noProductsFound": {
+    "description": "No products found message"
+  },
+
+  "addProduct": "Add Product",
+  "@addProduct": {
+    "description": "Add product button"
+  },
+
+  "productName": "Product Name",
+  "@productName": {
+    "description": "Product name label"
+  },
+
+  "productPrice": "Product Price",
+  "@productPrice": {
+    "description": "Product price label"
+  },
+
+  "productQuantity": "Quantity",
+  "@productQuantity": {
+    "description": "Product quantity label"
+  },
+
+  "category": "Category",
+  "@category": {
+    "description": "Category label"
+  },
+
+  "cost": "Cost",
+  "@cost": {
+    "description": "Cost label"
+  },
+
+  "unit": "Unit",
+  "@unit": {
+    "description": "Unit label"
+  },
+
+  "stockQuantity": "Stock Quantity",
+  "@stockQuantity": {
+    "description": "Stock quantity label"
+  },
+
+  "minimumStock": "Minimum Stock",
+  "@minimumStock": {
+    "description": "Minimum stock label"
+  },
+
+  "description": "Description",
+  "@description": {
+    "description": "Description label"
+  },
+
+  "save": "Save",
+  "@save": {
+    "description": "Save button"
+  },
+
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button"
+  },
+
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit button"
+  },
+
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm button"
+  },
+
+  "yes": "Yes",
+  "@yes": {
+    "description": "Yes button"
+  },
+
+  "no": "No",
+  "@no": {
+    "description": "No button"
+  },
+
+  "ok": "OK",
+  "@ok": {
+    "description": "OK button"
+  },
+
+  "back": "Back",
+  "@back": {
+    "description": "Back button"
+  },
+
+  "next": "Next",
+  "@next": {
+    "description": "Next button"
+  },
+
+  "done": "Done",
+  "@done": {
+    "description": "Done button"
+  },
+
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading message"
+  },
+
+  "error": "Error",
+  "@error": {
+    "description": "Error message"
+  },
+
+  "success": "Success",
+  "@success": {
+    "description": "Success message"
+  },
+
+  "warning": "Warning",
+  "@warning": {
+    "description": "Warning message"
+  },
+
+  "info": "Info",
+  "@info": {
+    "description": "Info message"
+  },
+
+  "customerDetails": "Customer Details",
+  "@customerDetails": {
+    "description": "Customer details title"
+  },
+
+  "customerName": "Customer Name",
+  "@customerName": {
+    "description": "Customer name label"
+  },
+
+  "customerPhone": "Customer Phone",
+  "@customerPhone": {
+    "description": "Customer phone label"
+  },
+
+  "customerEmail": "Customer Email",
+  "@customerEmail": {
+    "description": "Customer email label"
+  },
+
+  "customerAddress": "Customer Address",
+  "@customerAddress": {
+    "description": "Customer address label"
+  },
+
+  "invoicePreview": "Invoice Preview",
+  "@invoicePreview": {
+    "description": "Invoice preview title"
+  },
+
+  "invoiceNumber": "Invoice Number",
+  "@invoiceNumber": {
+    "description": "Invoice number label"
+  },
+
+  "invoiceDate": "Invoice Date",
+  "@invoiceDate": {
+    "description": "Invoice date label"
+  },
+
+  "dueDate": "Due Date",
+  "@dueDate": {
+    "description": "Due date label"
+  },
+
+  "subtotal": "Subtotal",
+  "@subtotal": {
+    "description": "Subtotal label"
+  },
+
+  "discount": "Discount",
+  "@discount": {
+    "description": "Discount label"
+  },
+
+  "total": "Total",
+  "@total": {
+    "description": "Total label"
+  },
+
+  "paymentMethod": "Payment Method",
+  "@paymentMethod": {
+    "description": "Payment method label"
+  },
+
+  "cash": "Cash",
+  "@cash": {
+    "description": "Cash payment method"
+  },
+
+  "card": "Card",
+  "@card": {
+    "description": "Card payment method"
+  },
+
+  "upi": "UPI",
+  "@upi": {
+    "description": "UPI payment method"
+  },
+
+  "bank": "Bank Transfer",
+  "@bank": {
+    "description": "Bank transfer payment method"
+  },
+
+  "selectPaymentMethod": "Select Payment Method",
+  "@selectPaymentMethod": {
+    "description": "Select payment method title"
+  },
+
+  "generateQrCode": "Generate QR Code",
+  "@generateQrCode": {
+    "description": "Generate QR code button"
+  },
+
+  "scanToPay": "Scan to Pay",
+  "@scanToPay": {
+    "description": "Scan to pay title"
+  },
+
+  "qrCodeForPayment": "QR Code for Payment",
+  "@qrCodeForPayment": {
+    "description": "QR code for payment title"
+  },
+
+  "shareInvoice": "Share Invoice",
+  "@shareInvoice": {
+    "description": "Share invoice button"
+  },
+
+  "downloadInvoice": "Download Invoice",
+  "@downloadInvoice": {
+    "description": "Download invoice button"
+  },
+
+  "printInvoice": "Print Invoice",
+  "@printInvoice": {
+    "description": "Print invoice button"
+  },
+
+  "quantity": "Quantity",
+  "@quantity": {
+    "description": "Quantity label"
+  },
+
+  "price": "Price",
+  "@price": {
+    "description": "Price label"
+  },
+
+  "amount": "Amount",
+  "@amount": {
+    "description": "Amount label"
+  },
+
+  "enterQuantity": "Enter Quantity",
+  "@enterQuantity": {
+    "description": "Enter quantity dialog title"
+  },
+
+  "invalidQuantity": "Invalid quantity",
+  "@invalidQuantity": {
+    "description": "Invalid quantity error"
+  },
+
+  "outOfStock": "Out of Stock",
+  "@outOfStock": {
+    "description": "Out of stock label"
+  },
+
+  "lowStock": "Low Stock",
+  "@lowStock": {
+    "description": "Low stock label"
+  },
+
+  "inStock": "In Stock",
+  "@inStock": {
+    "description": "In stock label"
+  },
+
+  "availableStock": "Available Stock: {count}",
+  "@availableStock": {
+    "description": "Available stock label",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+
+  "discountPercentage": "Discount (%)",
+  "@discountPercentage": {
+    "description": "Discount percentage label"
+  },
+
+  "discountAmount": "Discount Amount",
+  "@discountAmount": {
+    "description": "Discount amount label"
+  },
+
+  "applyDiscount": "Apply Discount",
+  "@applyDiscount": {
+    "description": "Apply discount button"
+  },
+
+  "removeDiscount": "Remove Discount",
+  "@removeDiscount": {
+    "description": "Remove discount button"
+  },
+
+  "selectCustomer": "Select Customer",
+  "@selectCustomer": {
+    "description": "Select customer button"
+  },
+
+  "addNewCustomer": "Add New Customer",
+  "@addNewCustomer": {
+    "description": "Add new customer button"
+  },
+
+  "customerRequired": "Customer details are required",
+  "@customerRequired": {
+    "description": "Customer required error"
+  },
+
+  "productsRequired": "Please add at least one product",
+  "@productsRequired": {
+    "description": "Products required error"
+  },
+
+  "invoiceCreated": "Invoice created successfully",
+  "@invoiceCreated": {
+    "description": "Invoice created success message"
+  },
+
+  "invoiceCreationFailed": "Failed to create invoice",
+  "@invoiceCreationFailed": {
+    "description": "Invoice creation failed error"
+  },
+
+  "login": "Login",
+  "@login": {
+    "description": "Login button"
+  },
+
+  "register": "Register",
+  "@register": {
+    "description": "Register button"
+  },
+
+  "forgotPassword": "Forgot Password?",
+  "@forgotPassword": {
+    "description": "Forgot password link"
+  },
+
+  "password": "Password",
+  "@password": {
+    "description": "Password label"
+  },
+
+  "confirmPassword": "Confirm Password",
+  "@confirmPassword": {
+    "description": "Confirm password label"
+  },
+
+  "firstName": "First Name",
+  "@firstName": {
+    "description": "First name label"
+  },
+
+  "lastName": "Last Name",
+  "@lastName": {
+    "description": "Last name label"
+  },
+
+  "mobileNumber": "Mobile Number",
+  "@mobileNumber": {
+    "description": "Mobile number label"
+  },
+
+  "emailAddress": "Email Address",
+  "@emailAddress": {
+    "description": "Email address label"
+  },
+
+  "loginToAccount": "Login to your account",
+  "@loginToAccount": {
+    "description": "Login screen subtitle"
+  },
+
+  "createNewAccount": "Create a new account",
+  "@createNewAccount": {
+    "description": "Register screen subtitle"
+  },
+
+  "alreadyHaveAccount": "Already have an account?",
+  "@alreadyHaveAccount": {
+    "description": "Already have account text"
+  },
+
+  "dontHaveAccount": "Don't have an account?",
+  "@dontHaveAccount": {
+    "description": "Don't have account text"
+  },
+
+  "signInHere": "Sign in here",
+  "@signInHere": {
+    "description": "Sign in here link"
+  },
+
+  "signUpHere": "Sign up here",
+  "@signUpHere": {
+    "description": "Sign up here link"
+  },
+
+  "welcomeBack": "Welcome Back!",
+  "@welcomeBack": {
+    "description": "Welcome back title"
+  },
+
+  "getStarted": "Get Started",
+  "@getStarted": {
+    "description": "Get started title"
+  },
+
+  "invalidEmail": "Invalid email address",
+  "@invalidEmail": {
+    "description": "Invalid email error"
+  },
+
+  "invalidPhone": "Invalid phone number",
+  "@invalidPhone": {
+    "description": "Invalid phone error"
+  },
+
+  "passwordTooShort": "Password must be at least 8 characters",
+  "@passwordTooShort": {
+    "description": "Password too short error"
+  },
+
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {
+    "description": "Passwords do not match error"
+  },
+
+  "fieldRequired": "This field is required",
+  "@fieldRequired": {
+    "description": "Field required error"
+  },
+
+  "loginSuccessful": "Login successful",
+  "@loginSuccessful": {
+    "description": "Login successful message"
+  },
+
+  "registrationSuccessful": "Registration successful",
+  "@registrationSuccessful": {
+    "description": "Registration successful message"
+  },
+
+  "loginFailed": "Login failed",
+  "@loginFailed": {
+    "description": "Login failed error"
+  },
+
+  "registrationFailed": "Registration failed",
+  "@registrationFailed": {
+    "description": "Registration failed error"
+  },
+
+  "networkError": "Network error. Please check your connection.",
+  "@networkError": {
+    "description": "Network error message"
+  },
+
+  "serverError": "Server error. Please try again later.",
+  "@serverError": {
+    "description": "Server error message"
+  },
+
+  "unknownError": "An unknown error occurred",
+  "@unknownError": {
+    "description": "Unknown error message"
+  },
+
+  "billTo": "Bill To:",
+  "@billTo": {
+    "description": "Bill To label"
+  },
+
+  "items": "Items:",
+  "@items": {
+    "description": "Items label"
+  },
+
+  "product": "Product",
+  "@product": {
+    "description": "Product column header"
+  },
+
+  "qty": "Qty",
+  "@qty": {
+    "description": "Quantity column header"
+  },
+
+  "per": "per",
+  "@per": {
+    "description": "Per unit label"
+  },
+
+  "totalAmount": "Total Amount",
+  "@totalAmount": {
+    "description": "Total amount label"
+  },
+
+  "paymentInformation": "Payment Information:",
+  "@paymentInformation": {
+    "description": "Payment information section title"
+  },
+
+  "paymentMethodLabel": "Payment Method:",
+  "@paymentMethodLabel": {
+    "description": "Payment method label"
+  },
+
+  "online": "Online (UPI)",
+  "@online": {
+    "description": "Online payment method"
+  },
+
+  "thankYouBusiness": "Thank you for your business!",
+  "@thankYouBusiness": {
+    "description": "Thank you message"
+  },
+
+  "generatedOn": "Generated on",
+  "@generatedOn": {
+    "description": "Generated on timestamp label"
+  },
+
+  "invoiceGenerated": "Invoice Generated",
+  "@invoiceGenerated": {
+    "description": "Invoice generated screen title"
+  },
+
+  "fullScreen": "Full Screen",
+  "@fullScreen": {
+    "description": "Full screen tooltip"
+  },
+
+  "exitFullScreen": "Exit Full Screen",
+  "@exitFullScreen": {
+    "description": "Exit full screen tooltip"
+  },
+
+  "send": "SEND",
+  "@send": {
+    "description": "Send button"
+  },
+
+  "print": "PRINT",
+  "@print": {
+    "description": "Print button"
+  },
+
+  "createNewInvoice": "Create New Invoice",
+  "@createNewInvoice": {
+    "description": "Create new invoice button"
+  },
+
+  "reports": "Reports",
+  "@reports": {
+    "description": "Reports screen title"
+  },
+
+  "recalculateReports": "Recalculate Reports",
+  "@recalculateReports": {
+    "description": "Recalculate reports menu item"
+  },
+
+  "cleanupOldData": "Cleanup Old Data",
+  "@cleanupOldData": {
+    "description": "Cleanup old data menu item"
+  },
+
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button"
+  },
+
+  "monthly": "Monthly",
+  "@monthly": {
+    "description": "Monthly tab label"
+  },
+
+  "yearly": "Yearly",
+  "@yearly": {
+    "description": "Yearly tab label"
+  },
+
+  "currentMonth": "Current Month",
+  "@currentMonth": {
+    "description": "Current month label"
+  },
+
+  "currentYear": "Current Year",
+  "@currentYear": {
+    "description": "Current year label"
+  },
+
+  "revenue": "Revenue",
+  "@revenue": {
+    "description": "Revenue label"
+  },
+
+  "investment": "Investment",
+  "@investment": {
+    "description": "Investment label"
+  },
+
+  "profit": "Profit",
+  "@profit": {
+    "description": "Profit label"
+  },
+
+  "selectYear": "Select Year",
+  "@selectYear": {
+    "description": "Select year dropdown label"
+  },
+
+  "noDataAvailable": "No Data Available",
+  "@noDataAvailable": {
+    "description": "No data available message"
+  },
+
+  "margin": "Margin",
+  "@margin": {
+    "description": "Margin label"
+  },
+
+  "recalculatingReports": "Recalculating reports...",
+  "@recalculatingReports": {
+    "description": "Recalculating reports message"
+  },
+
+  "dataCleanedUp": "Old data has been cleaned up",
+  "@dataCleanedUp": {
+    "description": "Data cleaned up message"
+  },
+
+  "welcomeBack": "Welcome back,",
+  "@welcomeBack": {
+    "description": "Welcome message in dashboard"
+  },
+
+  "readyToManage": "Ready to manage your business today?",
+  "@readyToManage": {
+    "description": "Ready to manage business message"
+  },
+
+  "upgradeToAccess": "Upgrade to access all features",
+  "@upgradeToAccess": {
+    "description": "Upgrade subscription message"
+  },
+
+  "upgrade": "Upgrade",
+  "@upgrade": {
+    "description": "Upgrade button text"
+  },
+
+  "quickActions": "Quick Actions",
+  "@quickActions": {
+    "description": "Quick actions section title"
+  },
+
+  "newInvoice": "New invoice",
+  "@newInvoice": {
+    "description": "New invoice subtitle"
+  },
+
+  "viewProducts": "View Products",
+  "@viewProducts": {
+    "description": "View products action title"
+  },
+
+  "manageStock": "Manage stock",
+  "@manageStock": {
+    "description": "Manage stock subtitle"
+  },
+
+  "overview": "Overview",
+  "@overview": {
+    "description": "Overview section title"
+  },
+
+  "totalRevenue": "Monthly Revenue",
+  "@totalRevenue": {
+    "description": "Monthly revenue card title"
+  },
+
+  "tapToViewDetails": "Tap to view details",
+  "@tapToViewDetails": {
+    "description": "Hint text for interactive cards"
   }
 }

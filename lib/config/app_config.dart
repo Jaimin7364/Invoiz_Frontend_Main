@@ -10,7 +10,7 @@ class AppConfig {
   static const String userEndpoint = '$baseUrl/user';
   
   // Razorpay Configuration
-  static const String razorpayKeyId = 'your_razorpay_key_id';
+  static const String razorpayKeyId = 'rzp_live_RQWzfr7G9SM0f9';
   
   // App Configuration
   static const String appName = 'Invoiz';

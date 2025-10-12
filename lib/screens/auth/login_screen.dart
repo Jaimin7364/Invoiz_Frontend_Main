@@ -77,12 +77,13 @@ class _LoginScreenState extends State<LoginScreen> {
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSizes.lg),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSizes.lg),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: AppSizes.xl),
               
@@ -291,8 +292,9 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: AppSizes.lg),
             ],
           ),
-        ),
-      ),
-    );
+        ), // Form
+      ), // SingleChildScrollView 
+    ), // SafeArea
+  ); // Scaffold
   }
 }

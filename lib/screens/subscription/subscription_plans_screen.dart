@@ -28,72 +28,15 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
   bool _isLoading = false;
   late RazorpayService _razorpayService;
 
-  final List<Map<String, dynamic>> _plans = [
-    {
-      'id': 'basic',
-      'name': 'Basic Plan',
-      'price': '₹100',
-      'duration': 'per month',
-      'features': [
-        'Basic invoicing',
-        'Up to 50 invoices/month',
-        'Email support',
-        'Basic templates',
-      ],
-      'popular': false,
-    },
-    {
-      'id': 'pro',
-      'name': 'Pro Plan',
-      'price': '₹549',
-      'duration': 'for 6 months',
-      'features': [
-        'Advanced invoicing',
-        'Unlimited invoices',
-        'Priority support',
-        'Custom templates',
-        'Payment tracking',
-        'Expense management',
-      ],
-      'popular': true,
-    },
-    {
-      'id': 'premium',
-      'name': 'Premium Plan',
-      'price': '₹999',
-      'duration': 'for 12 months',
-      'features': [
-        'All Pro features',
-        'Multi-business support',
-        'Advanced analytics',
-        'Custom branding',
-        'API access',
-        'Priority phone support',
-      ],
-      'popular': false,
-    },
-    {
-      'id': 'enterprise',
-      'name': 'Enterprise Plan',
-      'price': '₹2,499',
-      'duration': 'for 3 years',
-      'features': [
-        'All Premium features',
-        'Dedicated account manager',
-        'Custom integrations',
-        'White-label solution',
-        'Advanced security',
-        '24/7 phone support',
-      ],
-      'popular': false,
-    },
-  ];
+  List<Map<String, dynamic>> _plans = [];
+  bool _loadingPlans = true;
 
   @override
   void initState() {
     super.initState();
     _razorpayService = RazorpayService();
     _razorpayService.initialize();
+    _loadPlans();
   }
 
   @override
@@ -102,12 +45,41 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
     super.dispose();
   }
 
+  Future<void> _loadPlans() async {
+    try {
+      final plansResp = await _razorpayService.getSubscriptionPlans();
+      if (plansResp.isSuccess && plansResp.data != null) {
+        setState(() {
+          _plans = plansResp.data!.map((p) => {
+                'id': p.planId,
+                'name': p.name,
+                'price': '₹${p.priceInr}',
+                'duration': p.durationText,
+                'features': p.features,
+                'popular': p.planId == 'pro',
+              }).toList();
+          _loadingPlans = false;
+        });
+      } else {
+        setState(() { _loadingPlans = false; });
+      }
+    } catch (e) {
+      setState(() { _loadingPlans = false; });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final bool isSubscriptionExpired = authProvider.isLoggedIn && 
         (!authProvider.hasActiveSubscription || authProvider.isSubscriptionExpired);
     
+    if (_loadingPlans) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return PopScope(
       canPop: widget.canGoBack && !isSubscriptionExpired,
       onPopInvoked: (didPop) {
@@ -125,7 +97,8 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
           title: isSubscriptionExpired ? 'Renew Your Plan' : 'Choose Your Plan',
           showBackButton: widget.canGoBack && !isSubscriptionExpired,
         ),
-      body: Column(
+        body: SafeArea(
+          child: Column(
         children: [
           // Header
           Container(
@@ -372,6 +345,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
             ),
           ),
         ],
+        ),
       ),
       ),
     );
@@ -422,6 +396,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
         userPhone: user.mobileNumber,
         userName: user.fullName,
         description: 'Subscription to ${selectedPlanData['name']}',
+        keyId: orderData['razorpay_key'],
         onSuccess: (PaymentSuccessResponse response) async {
           print('Payment success: ${response.paymentId}');
           await _handlePaymentSuccess(response, orderData);
@@ -464,72 +439,168 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
         _isLoading = true;
       });
 
-      // Verify payment with backend
-      final verifyResponse = await _razorpayService.verifyPayment(
-        orderId: response.orderId!,
-        paymentId: response.paymentId!,
-        signature: response.signature!,
-        planType: _selectedPlan!,
-      );
+      print('Starting payment verification...');
+      print('Payment ID: ${response.paymentId}');
+      print('Order ID: ${response.orderId}');
 
-      if (verifyResponse.isSuccess) {
-        // Update auth provider with new subscription info
-        final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        
-        // Wait for the subscription to be active before proceeding
-        final hasActiveSubscription = await authProvider.waitForActiveSubscription();
-        
-        if (mounted) {
-          if (hasActiveSubscription) {
+      // Add a small delay to ensure the payment is processed on Razorpay's end
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Resolve orderId (server is source of truth)
+      final String safeOrderId = (orderData['order_id'] as String);
+
+      print('Resolved verification params (server-driven):');
+      print('  - orderId: $safeOrderId');
+
+      // Verify payment with backend by order only (server will fetch/capture status)
+      bool verificationSuccess = false;
+      String? errorMessage;
+      
+      for (int attempt = 1; attempt <= 3; attempt++) {
+        try {
+          print('Payment verification attempt $attempt/3...');
+          final verifyResponse = await _razorpayService.verifyPaymentByOrder(
+            orderId: safeOrderId,
+            planType: _selectedPlan!,
+          );
+
+          if (verifyResponse.isSuccess) {
+            verificationSuccess = true;
+            print('Payment verification successful on attempt $attempt');
+            break;
+          } else {
+            errorMessage = verifyResponse.error ?? 'Payment verification failed';
+            print('Payment verification failed on attempt $attempt: $errorMessage');
+            
+            if (attempt < 3) {
+              await Future.delayed(Duration(seconds: attempt * 2)); // 2s, 4s delay
+            }
+          }
+        } catch (e) {
+          errorMessage = e.toString();
+          print('Payment verification error on attempt $attempt: $e');
+          
+          if (attempt < 3) {
+            await Future.delayed(Duration(seconds: attempt * 2)); // 2s, 4s delay
+          }
+        }
+      }
+
+      if (!verificationSuccess) {
+        throw Exception(errorMessage ?? 'Payment verification failed after multiple attempts');
+      }
+
+      // Update auth provider with new subscription info
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      
+      print('Waiting for subscription to be activated...');
+      
+      // Wait for the subscription to be active before proceeding
+      final hasActiveSubscription = await authProvider.waitForActiveSubscription();
+      
+      if (mounted) {
+        if (hasActiveSubscription) {
+          print('Subscription successfully activated!');
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('🎉 Subscription activated successfully!'),
+              backgroundColor: AppColors.success,
+              duration: Duration(seconds: 3),
+            ),
+          );
+
+          // Bypass the next subscription check to avoid redirect loop
+          SubscriptionGuardService.bypassNextCheck();
+          
+          // Navigate to home with a small delay for user feedback
+          await Future.delayed(const Duration(seconds: 1));
+          
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => const HomeScreen(),
+            ),
+            (route) => false,
+          );
+        } else {
+          print('Subscription not yet active, showing pending message...');
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('💳 Payment successful! Subscription activation in progress...'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 5),
+            ),
+          );
+          
+          // Try one more time with extended wait
+          print('Attempting extended wait for subscription activation...');
+          
+          for (int i = 0; i < 3; i++) {
+            await Future.delayed(const Duration(seconds: 3));
+            await authProvider.getCurrentUser();
+            
+            if (authProvider.hasActiveSubscription && !authProvider.isSubscriptionExpired) {
+              print('Subscription activated after extended wait!');
+              
+              if (mounted) {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('✅ Subscription successfully activated!'),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
+                
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (context) => const HomeScreen(),
+                  ),
+                  (route) => false,
+                );
+              }
+              return;
+            }
+          }
+          
+          // If still not active after extended wait, show error but still proceed
+          if (mounted) {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Subscription activated successfully!'),
-                backgroundColor: AppColors.success,
+                content: Text('⚠️ Payment completed but subscription may take a few minutes to activate. Please refresh the app.'),
+                backgroundColor: Colors.amber,
+                duration: Duration(seconds: 8),
               ),
             );
-
-            // Bypass the next subscription check to avoid redirect loop
-            SubscriptionGuardService.bypassNextCheck();
             
+            // Still navigate to home as payment was successful
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
                 builder: (context) => const HomeScreen(),
               ),
               (route) => false,
             );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Payment successful, but subscription activation is pending. Please wait...'),
-                backgroundColor: Colors.orange,
-              ),
-            );
-            
-            // Try refreshing one more time after a delay
-            Future.delayed(const Duration(seconds: 3), () async {
-              await authProvider.getCurrentUser();
-              if (authProvider.hasActiveSubscription && !authProvider.isSubscriptionExpired) {
-                if (mounted) {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (context) => const HomeScreen(),
-                    ),
-                    (route) => false,
-                  );
-                }
-              }
-            });
           }
         }
-      } else {
-        throw Exception(verifyResponse.error ?? 'Payment verification failed');
       }
     } catch (e) {
+      print('Error in payment success handler: $e');
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Payment verification failed: ${e.toString()}'),
+            content: Text('❌ Payment verification failed: ${e.toString()}'),
             backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 8),
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: () {
+                // Trigger manual verification
+                _handlePaymentSuccess(response, orderData);
+              },
+            ),
           ),
         );
       }
@@ -548,10 +619,49 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
         _isLoading = false;
       });
 
+      String errorMessage = 'Payment failed';
+      
+      // Provide more specific error messages based on the error code
+      switch (response.code) {
+        case 0:
+          errorMessage = 'Payment was cancelled by user';
+          break;
+        case 1:
+          errorMessage = 'Payment failed due to invalid details';
+          break;
+        case 2:
+          errorMessage = 'Network error occurred during payment';
+          break;
+        default:
+          errorMessage = response.message ?? 'Payment failed with unknown error';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Payment failed: ${response.message}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '❌ $errorMessage',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              if (response.code != 0) // Don't show retry option for user cancellation
+                const Text(
+                  'Please try again or contact support if the issue persists.',
+                  style: TextStyle(fontSize: 12),
+                ),
+            ],
+          ),
           backgroundColor: AppColors.error,
+          duration: const Duration(seconds: 8),
+          action: response.code != 0 ? SnackBarAction(
+            label: 'Retry',
+            textColor: Colors.white,
+            onPressed: () {
+              _proceedWithSubscription();
+            },
+          ) : null,
         ),
       );
     }

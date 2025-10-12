@@ -9,6 +9,9 @@ class InvoiceProvider extends ChangeNotifier {
   // Callback for notifying product stock updates
   Function(List<Map<String, dynamic>>)? onStockUpdated;
 
+  // Callback for notifying reports about new invoice
+  Function(Invoice)? onInvoiceCreated;
+
   // Current invoice being created
   Invoice? _currentInvoice;
   
@@ -36,6 +39,11 @@ class InvoiceProvider extends ChangeNotifier {
   // Set stock update callback
   void setStockUpdateCallback(Function(List<Map<String, dynamic>>) callback) {
     onStockUpdated = callback;
+  }
+
+  // Set invoice created callback
+  void setInvoiceCreatedCallback(Function(Invoice) callback) {
+    onInvoiceCreated = callback;
   }
 
   // Getters
@@ -230,6 +238,11 @@ class InvoiceProvider extends ChangeNotifier {
         // Store invoice
         _currentInvoice = invoice;
         _invoices.insert(0, invoice);
+
+        // Notify about invoice creation for reports
+        if (onInvoiceCreated != null) {
+          onInvoiceCreated!(invoice);
+        }
 
         // Notify about stock updates
         if (onStockUpdated != null) {
