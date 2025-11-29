@@ -64,8 +64,8 @@ class SubscriptionGuardService {
       
       // Check if user has active subscription
       if (!authProvider.hasActiveSubscription || authProvider.isSubscriptionExpired) {
-        debugPrint('$_tag: User subscription invalid or expired. Redirecting to plans.');
-        _redirectToSubscriptionPlans(context);
+        debugPrint('$_tag: User subscription invalid or expired. Access allowed but limited.');
+        // Don't redirect - just return false to indicate no active subscription
         return false;
       }
       
@@ -73,8 +73,7 @@ class SubscriptionGuardService {
       return true;
     } catch (e) {
       debugPrint('$_tag: Error checking subscription: $e');
-      // On error, redirect to plans to be safe
-      _redirectToSubscriptionPlans(context);
+      // On error, allow access but show warning
       return false;
     }
   }
@@ -112,17 +111,14 @@ class SubscriptionGuardService {
       
       // Check if subscription has expired
       if (!authProvider.hasActiveSubscription || authProvider.isSubscriptionExpired) {
-        debugPrint('$_tag: Subscription expired during app usage. Redirecting to plans.');
-        _redirectToSubscriptionPlans(context);
+        debugPrint('$_tag: Subscription expired during app usage. User will see warning in dashboard.');
+        // Don't redirect - let dashboard show the warning
         return;
       }
       
       // Show warning if subscription is expiring soon
       if (authProvider.shouldShowSubscriptionWarning) {
-        showSubscriptionExpiryWarning(
-          context,
-          daysRemaining: authProvider.subscriptionDaysRemaining,
-        );
+        debugPrint('$_tag: Subscription expiring soon (${authProvider.subscriptionDaysRemaining} days). User will see warning in dashboard.');
       }
     } catch (e) {
       debugPrint('$_tag: Error in periodic subscription check: $e');

@@ -10,6 +10,7 @@ import '../../models/user_model.dart';
 import '../../l10n/app_localizations.dart';
 import '../auth/welcome_screen.dart';
 import '../business/business_details_screen.dart';
+import '../admin/admin_panel_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -105,60 +106,79 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: AppSizes.lg),
 
                 // Profile Options
-                _buildProfileOption(
-                  icon: Icons.person_outline,
-                  title: 'Edit Profile',
-                  subtitle: 'Update your personal information',
-                  onTap: () {
-                    _showComingSoon(context);
-                  },
-                ),
-                _buildProfileOption(
-                  icon: Icons.business_outlined,
-                  title: localizations.businessDetails,
-                  subtitle: user?.businessInfo?.businessName ?? localizations.manageBusinessInformation,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const BusinessDetailsScreen(),
-                      ),
-                    );
-                  },
-                ),
-                _buildProfileOption(
-                  icon: Icons.subscriptions_outlined,
-                  title: localizations.subscriptionPlans,
-                  subtitle: localizations.upgradeOrManageSubscription,
-                  onTap: () {
-                    Navigator.pushNamed(context, '/subscription-plans');
-                  },
-                ),
-                _buildProfileOption(
-                  icon: Icons.settings_outlined,
-                  title: 'Settings',
-                  subtitle: 'App preferences and configurations',
-                  onTap: () {
-                    _showComingSoon(context);
-                  },
-                ),
-                const LanguageSelector(),
-                _buildProfileOption(
-                  icon: Icons.help_outline,
-                  title: 'Help & Support',
-                  subtitle: 'Get help and contact support',
-                  onTap: () {
-                    _showComingSoon(context);
-                  },
-                ),
-                _buildProfileOption(
-                  icon: Icons.info_outline,
-                  title: 'About',
-                  subtitle: 'App version and information',
-                  onTap: () {
-                    _showComingSoon(context);
-                  },
-                ),
+                // Admin Panel Option (only for Admin users)
+                if (user?.role == 'Admin') ...[
+                  _buildProfileOption(
+                    icon: Icons.admin_panel_settings,
+                    title: 'Admin Panel',
+                    subtitle: 'Manage users and subscriptions',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AdminPanelScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const LanguageSelector(),
+                ] else ...[
+                  // Show normal user options only for non-admin users
+                  _buildProfileOption(
+                    icon: Icons.person_outline,
+                    title: 'Edit Profile',
+                    subtitle: 'Update your personal information',
+                    onTap: () {
+                      _showComingSoon(context);
+                    },
+                  ),
+                  _buildProfileOption(
+                    icon: Icons.business_outlined,
+                    title: localizations.businessDetails,
+                    subtitle: user?.businessInfo?.businessName ?? localizations.manageBusinessInformation,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const BusinessDetailsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildProfileOption(
+                    icon: Icons.subscriptions_outlined,
+                    title: localizations.subscriptionPlans,
+                    subtitle: localizations.upgradeOrManageSubscription,
+                    onTap: () {
+                      Navigator.pushNamed(context, '/subscription-plans');
+                    },
+                  ),
+                  _buildProfileOption(
+                    icon: Icons.settings_outlined,
+                    title: 'Settings',
+                    subtitle: 'App preferences and configurations',
+                    onTap: () {
+                      _showComingSoon(context);
+                    },
+                  ),
+                  const LanguageSelector(),
+                  _buildProfileOption(
+                    icon: Icons.help_outline,
+                    title: 'Help & Support',
+                    subtitle: 'Get help and contact support',
+                    onTap: () {
+                      _showComingSoon(context);
+                    },
+                  ),
+                  _buildProfileOption(
+                    icon: Icons.info_outline,
+                    title: 'About',
+                    subtitle: 'App version and information',
+                    onTap: () {
+                      _showComingSoon(context);
+                    },
+                  ),
+                ],
                 const SizedBox(height: AppSizes.lg),
 
                 // Logout Button

@@ -6,6 +6,7 @@ import '../../providers/reports_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../services/subscription_guard_service.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../widgets/subscription_warning_banner.dart';
 import '../../l10n/app_localizations.dart';
 import '../subscription/subscription_status_screen.dart';
 import 'profile_screen.dart';
@@ -161,6 +162,9 @@ class _DashboardTabState extends State<DashboardTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Subscription Warning Banner
+                const SubscriptionWarningBanner(),
+                
                 // Welcome Card
                 Container(
                   width: double.infinity,
